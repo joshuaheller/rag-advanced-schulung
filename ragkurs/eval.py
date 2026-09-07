@@ -47,12 +47,19 @@ def retrieval_row(result: RunResult, item: dict, k: int) -> dict:
     }
 
 
-def evaluate_retrieval(pipeline: RAGPipeline, golden: list[dict], user_roles: list[str] | None = None, k: int | None = None) -> pd.DataFrame:
-    """Nur Retrieval (keine LLM-Kosten). Nutzt answerable=True-Fragen mit Quellen."""
+def evaluate_retrieval(pipeline: RAGPipeline, golden: list[dict], user_roles: list[str] | None = None, k: int | None = None,
+                       include_acl: bool = False) -> pd.DataFrame:
+    """Nur Retrieval (keine LLM-Kosten). Nutzt answerable=True-Fragen mit Quellen.
+
+    Fragen vom Typ "acl" werden standardmaessig uebersprungen: ihre Quelle ist fuer die Rolle "employee" absichtlich
+    unsichtbar, ein Miss ist dort korrektes Verhalten. Sie werden in Lab 6 mit acl_leak_test geprueft (include_acl=True).
+    """
     k = k or pipeline.config.k
     rows = []
     for item in golden:
         if not item.get("source_docs"):
+            continue
+        if item.get("type") == "acl" and not include_acl:
             continue
         res = pipeline.retrieve_only(item["question"], user_roles=user_roles)
         rows.append(retrieval_row(res, item, k))
@@ -134,10 +141,15 @@ def classify_failure(row: dict) -> str:
     return "generation:wrong_answer"
 
 
-def run_golden(pipeline: RAGPipeline, golden: list[dict], user_roles: list[str] | None = None, judge: bool = True, verbose: bool = True) -> pd.DataFrame:
-    """Kompletter Lauf (Retrieval + Generierung + Judge). Kosten: ~2 LLM-Calls pro Frage."""
+def run_golden(pipeline: RAGPipeline, golden: list[dict], user_roles: list[str] | None = None, judge: bool = True, verbose: bool = True,
+               include_acl: bool = False) -> pd.DataFrame:
+    """Kompletter Lauf (Retrieval + Generierung + Judge). Kosten: ~2 LLM-Calls pro Frage.
+
+    Fragen vom Typ "acl" werden standardmaessig uebersprungen (siehe evaluate_retrieval) - Lab 6 testet sie gezielt.
+    """
     rows = []
     judge_llm = get_judge_llm() if judge else None
+    golden = [g for g in golden if include_acl or g.get("type") != "acl"]
     for i, item in enumerate(golden, start=1):
         res = pipeline.run(item["question"], user_roles=user_roles)
         r = retrieval_row(res, item, pipeline.config.k)

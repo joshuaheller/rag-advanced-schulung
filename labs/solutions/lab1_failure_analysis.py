@@ -31,7 +31,7 @@ from ragkurs.eval import load_golden, run_golden, e2e_summary, failure_breakdown
 
 docs = load_corpus()
 index = HybridIndex(collection="baseline").build(chunk_fixed(docs, 800, 100))
-baseline = RAGPipeline(index, PipelineConfig(retrieval="dense", k=5, name="baseline"))
+baseline = RAGPipeline(index, PipelineConfig(retrieval="dense", k=5, status_filter=None, name="baseline"))  # naiv, wie in Lab 0
 golden = load_golden()
 
 # %% [markdown]
@@ -49,6 +49,12 @@ r.show(n_chars=200)
 print("\nErwartete Quelle(n):", item["source_docs"])
 
 # %% [markdown]
+# Schaut auf die **Scores** der Top-5: Wartungsplan, AX-200 und AX-300 liegen typischerweise nur wenige Hundertstel
+# auseinander. Die Antwort ist (meist) richtig, weil das AX-200-Handbuch *irgendwo* in den Top-5 steht und das Modell
+# die richtige Zeile herauspickt. Das ist kein Verdienst des Retrievals – bei k=3, einem engeren Kontextbudget oder
+# einem etwas anders formulierten Chunk kippt es. Genau dafür gibt es die Kennzahl **p@1**.
+
+# %% [markdown]
 # ### A2 LLM-as-a-Judge: korrekt oder nicht?
 #
 # Wir bewerten **binär** (korrekt / nicht korrekt) mit Begründung – binäre Labels lassen sich gegen menschliche
@@ -58,14 +64,14 @@ print("\nErwartete Quelle(n):", item["source_docs"])
 judge_correctness(item["question"], r.answer.text, item["ground_truth"])
 
 # %% [markdown]
-# ### A3 Der ganze Lauf: 20 Fragen, automatisch klassifiziert
+# ### A3 Der ganze Lauf: das komplette Golden Set, automatisch klassifiziert
 #
 # `run_golden` führt Retrieval + Generierung + Judge aus und schlägt per Heuristik eine Fehlerklasse vor.
-# **Die Heuristik ist ein Vorschlag** – im Lab prüft ihr sie nach. (Kosten: ~2 LLM-Calls pro Frage.)
+# **Die Heuristik ist ein Vorschlag** – im Lab prüft ihr sie nach. (62 Fragen, ~2 LLM-Calls pro Frage, ca. 2 Minuten,
+# ca. 0,02 USD. Die `acl`-Fragen werden übersprungen, siehe Lab 0.)
 
 # %%
-subset = golden[:20]
-df = run_golden(baseline, subset, user_roles=["employee"])
+df = run_golden(baseline, golden, user_roles=["employee"])
 e2e_summary(df)
 
 # %%
@@ -78,7 +84,7 @@ df[df["failure"] != "ok"][["id", "type", "failure", "question", "retrieved_docs"
 # ## Teil B – Aufgaben
 #
 # ### B1 Heuristik nachprüfen
-# Nehmt euch **drei** als fehlerhaft klassifizierte Fragen und prüft manuell:
+# Nehmt euch **bis zu drei** als fehlerhaft klassifizierte Fragen und prüft manuell:
 # Stimmt die Klasse? Schaut euch dazu die Top-5-Kandidaten und die Antwort an (`baseline.run(...).show()`).
 # Korrigiert die Spalte `failure` im DataFrame, wo nötig.
 
@@ -145,6 +151,7 @@ pd.DataFrame(rows)
 # ## Teil C – Debrief
 #
 # 1. Wie groß ist der Anteil Retrieval- vs. Generierungsfehler? (Erfahrungswert in Produktion: 60–80 % Retrieval.)
+#    Und: Die Baseline liegt vermutlich über 90 % – warum ist das bei 42 Dokumenten *kein* Beweis für Produktionsreife?
 # 2. Welche Fehler wären mit „mehr Kontext“ (größeres k) behoben – und was kostet das?
 # 3. Welche drei Hebel nehmen wir uns für heute vor?
 #

@@ -80,3 +80,5 @@ kannst du bei Bedarf freigeben – sie sind im Repo, das ist kein Geheimnis.
 
 Ein kompletter Durchlauf aller Lösungs-Notebooks mit `gpt-5.6-luna`/`terra`: ca. 2–4 USD. Pro TN und Kurstag < 5 USD.
 Embedding-Cache (`.cache/`) sorgt dafür, dass wiederholte Index-Builds nichts kosten.
+
+> **Messwerte:** Alle Zahlen aus dem echten Testlauf (07.09.2026) samt Lesart pro Lab stehen in `10_Messwerte_Testlauf.md`. Die Folien und Sprechernotizen verwenden dieselben Werte. Vor dem Kurs Lab 0+1 einmal neu laufen lassen (`python scripts/run_all_labs.py 0 1`, ~3 Min), weil die Baseline jetzt ohne Versionsfilter läuft.

@@ -60,7 +60,9 @@ print(pdf_doc.text[600:1300])
 # ### A3 Das Golden Set
 #
 # 64 Fragen mit Referenzantwort, Quelldokument(en) und Typ. Damit messen wir in jedem Lab, ob eine Änderung
-# wirklich hilft – statt „sieht gut aus“ (LGTM@few).
+# wirklich hilft – statt „sieht gut aus“ (LGTM@few). Die zwei `acl`-Fragen (Gehaltsbänder, Rabatte) sind für die
+# Rolle `employee` absichtlich unauffindbar – sie werden in Lab 6 gesondert geprüft und in den Retrieval-Kennzahlen
+# übersprungen.
 
 # %%
 from ragkurs.eval import load_golden
@@ -76,7 +78,8 @@ pd.DataFrame(golden)[["id", "type", "question", "source_docs"]].head(8)
 # ### A4 Die naive Baseline
 #
 # Fixed-Size-Chunks (800 Zeichen) → Dense-Embeddings → Top-5 → Prompt → Antwort. Genau das, was die meisten
-# Teams als ersten Prototyp bauen.
+# Teams als ersten Prototyp bauen – inklusive des typischen Fehlers: **alles aus dem Ordner in den Index**, auch die
+# ersetzten Fassungen (`status_filter=None`). Versionen, Rechte und Metadaten kommen erst später ins Spiel.
 
 # %%
 from ragkurs import chunk_fixed, HybridIndex, RAGPipeline, PipelineConfig
@@ -91,7 +94,7 @@ index = HybridIndex(collection="baseline").build(chunks)   # Qdrant im Prozess, 
 index.stats
 
 # %%
-baseline = RAGPipeline(index, PipelineConfig(retrieval="dense", k=5, name="baseline"))
+baseline = RAGPipeline(index, PipelineConfig(retrieval="dense", k=5, status_filter=None, name="baseline"))  # naiv: kein Versionsfilter
 result = baseline.run("Wie viele Urlaubstage haben Vollzeitmitarbeitende pro Jahr?", user_roles=["employee"])
 result.show()
 
@@ -124,7 +127,8 @@ for typ in ("faktisch", "near-miss", "negativ"):
 
 # %% [markdown]
 # ### B2 Retrieval-Trefferquote der Baseline messen
-# Nutzt `evaluate_retrieval` (kein LLM-Call, nur Retrieval) und `retrieval_summary`. Wie hoch ist die Hit-Rate@5?
+# Nutzt `evaluate_retrieval` (kein LLM-Call, nur Retrieval) und `retrieval_summary`. Wie hoch ist die Hit-Rate@5 –
+# und wie hoch **p@1** (richtige Quelle auf Platz 1)? Die Differenz ist der Spielraum für Reranking (Lab 3).
 
 # %%
 from ragkurs.eval import evaluate_retrieval, retrieval_summary
@@ -142,7 +146,8 @@ df_base.groupby("type")["hit"].mean().sort_values()
 # %% [markdown]
 # ## Teil C – Debrief
 #
-# 1. Welche Fragetypen findet die Baseline schlecht – und warum vermutlich?
+# 1. Die Hit-Rate@5 ist bei 42 Dokumenten hoch – die naive Baseline wirkt „fertig“. Woran merkt man trotzdem,
+#    dass sie es nicht ist? (p@1 vs. Hit@5, ersetzte Fassungen im Index, Rechte, Kosten, 4.000 statt 42 Dokumente)
 # 2. Was fehlt dieser Pipeline, um produktionsreif zu sein? (Sammelt Stichworte – das ist die Agenda der zwei Tage.)
 #
 # **Merksatz:** Ohne Golden Set ist jede Verbesserung eine Vermutung.

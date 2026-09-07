@@ -1,0 +1,30 @@
+# Versionen, mit denen der komplette Testlauf am 07.09.2026 (macOS, Python 3.12) fehlerfrei lief.
+# Wird von setup.sh / setup.ps1 als pip-Constraint verwendet, damit auf den Kurs-VMs exakt dieselben Versionen landen.
+arize-phoenix==20.8.0
+arize-phoenix-otel==0.17.1
+deepeval==4.2.2
+docling==2.126.0
+ipykernel==7.3.0
+ipywidgets==8.1.9
+jupyterlab==4.6.3
+jupytext==1.19.5
+langchain-core==1.6.2
+langchain-openai==1.6.0
+langchain-text-splitters==1.1.2
+matplotlib==3.11.1
+numpy==2.5.3
+openai==3.8.0
+openinference-instrumentation-langchain==0.1.74
+openinference-instrumentation-openai==0.1.58
+pandas==3.0.5
+pypdf==6.17.0
+pytest==9.1.1
+python-dotenv==1.2.3
+pyyaml==6.0.3
+qdrant-client==1.19.0
+reportlab==5.0.1
+rerankers==0.10.0
+sentence-transformers==6.0.1
+tiktoken==0.14.0
+torch==2.14.0
+transformers==5.16.1

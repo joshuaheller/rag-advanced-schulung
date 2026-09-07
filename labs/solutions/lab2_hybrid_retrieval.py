@@ -50,6 +50,12 @@ for mode in ("dense", "sparse", "hybrid"):
     print(f"{mode:7s}", [(h.doc_id.replace('prod-handbuch-', ''), round(h.score, 3)) for h in hits])
 
 # %% [markdown]
+# Überraschung: BM25 setzt hier das **AX-300**-Handbuch auf Platz 1 – weil dort steht „kürzere Intervalle gegenüber
+# der AX-200“ und „Spindel“ mehrfach vorkommt. Exakte Terme helfen nur, wenn das *falsche* Dokument sie nicht auch
+# enthält. Hybrid mischt beide Listen; ob AX-200 oder AX-300 oben landet, entscheidet hier die Fusion. Merkt euch
+# die Frage – in Lab 3 löst sie der Reranker, in Lab 4 der Breadcrumb im Chunk.
+
+# %% [markdown]
 # ### A3 Reciprocal Rank Fusion – von Hand
 #
 # `score(d) = Σ 1 / (k + rank_i(d))` mit k = 60. Keine Normalisierung der Roh-Scores nötig – deshalb ist RRF
@@ -77,10 +83,18 @@ pipes = [
 ]
 compare_retrieval(pipes, golden, user_roles=["employee"])
 
+# %% [markdown]
+# Bei 42 Dokumenten ist die Hit-Rate@5 fast gesättigt – alle drei finden das richtige Dokument fast immer *irgendwo*
+# in den Top-5. Der Unterschied steckt in **p@1** und **MRR**: Wo steht die richtige Quelle? Deshalb unten beide
+# Kennzahlen je Fragetyp.
+
 # %%
-# Nach Fragetyp: Wo hilft Hybrid am meisten?
+# Nach Fragetyp: Hit-Rate@5 und p@1 (richtige Quelle auf Platz 1)
 frames = {p.config.label(): evaluate_retrieval(p, golden, ["employee"]) for p in pipes}
-pd.DataFrame({name: df.groupby("type")["hit"].mean() for name, df in frames.items()}).round(2)
+pd.concat({
+    "hit@5": pd.DataFrame({name: df.groupby("type")["hit"].mean() for name, df in frames.items()}),
+    "p@1":   pd.DataFrame({name: df.assign(p1=df["first_rank"] == 1).groupby("type")["p1"].mean() for name, df in frames.items()}),
+}, axis=1).round(2)
 
 # %% [markdown]
 # ### A5 Query-Transformationen
@@ -179,7 +193,8 @@ compare_retrieval(
 # %% [markdown]
 # ## Teil C – Debrief
 #
-# 1. Welche Technik hat auf *diesem* Korpus am meisten gebracht? Hättet ihr das vorher gewettet?
+# 1. Welche Technik hat auf *diesem* Korpus am meisten gebracht? Hättet ihr das vorher gewettet? Und welche Kennzahl
+#    hat den Unterschied überhaupt sichtbar gemacht – Hit@5 oder p@1/MRR?
 # 2. Multi-Query kostet 3–4× Retrieval und einen LLM-Call. Für welche Fragetypen lohnt sich das – und wie würdet ihr
 #    das in Produktion entscheiden (Routing)?
 # 3. ARAGOG (2024) fand: HyDE + Rerank helfen, Multi-Query oft nicht. Deckt sich das mit euren Zahlen?

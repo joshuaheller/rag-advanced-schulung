@@ -91,17 +91,28 @@ plt.tight_layout()
 #
 # ### A3 Semantic Cache
 #
-# Cache-Key ist das Embedding der Frage; Treffer ab Cosine ≥ 0,92 **und gleicher Rolle** (sonst ACL-Leak über den Cache!).
+# Cache-Key ist das Embedding der Frage; Treffer ab einer Cosine-Schwelle **und gleicher Rolle** (sonst ACL-Leak über den Cache!).
+#
+# Die Schwelle ist modellabhängig: `text-embedding-3-small` liefert für Paraphrasen derselben Frage nur ca. 0,73–0,87,
+# für eine *andere* Frage aus demselben Themenfeld ca. 0,45–0,7. Eine Schwelle von 0,92 (oft als Daumenregel genannt)
+# trifft hier **nie**; 0,85 fängt enge Paraphrasen; darunter wird es riskant. Schaut auf die `sim`-Spalte.
 
 # %%
 from ragkurs.cache import CachedPipeline, SemanticCache
 
-cached = CachedPipeline(pipe, SemanticCache(threshold=0.92))
-for q in ("Wie viele Urlaubstage haben Vollzeitmitarbeitende pro Jahr?", "Wie viele Urlaubstage hab ich?", "Urlaubstage pro Jahr?",
-          "Wieviel Urlaub bekomme ich?", "Wie lange ist die Probezeit?", "Wie lang ist die Probezeit bei Aurelia?"):
+fragen = ("Wie viele Urlaubstage haben Vollzeitmitarbeitende pro Jahr?", "Wie viele Urlaubstage hab ich?", "Urlaubstage pro Jahr?",
+          "Wieviel Urlaub bekomme ich?", "Wie lange ist die Probezeit?", "Wie lang ist die Probezeit bei Aurelia?",
+          "Wie viele Tage Sonderurlaub gibt es bei der Geburt des eigenen Kindes?")   # <- darf KEIN Cache-Hit auf 'Urlaubstage' sein
+cached = CachedPipeline(pipe, SemanticCache(threshold=0.85))
+for q in fragen:
     r = cached.run(q, ["employee"])
     print(f"{r.trace['cache']:4s} sim={r.trace['cache_similarity']:.3f} {r.trace['t_total_ms']:6.0f} ms | {q}")
 print("\nCache-Statistik:", cached.cache.stats)
+
+# %% [markdown]
+# Diskussion: Mit welcher Schwelle würden alle vier Urlaubs-Paraphrasen treffen – und was passiert dann mit der
+# Sonderurlaubs-Frage? Ein falscher Cache-Hit ist schlimmer als ein Miss: Der Nutzer bekommt eine *plausible* falsche
+# Antwort. In Produktion: Schwelle pro Embedding-Modell auf einem Paraphrasen-Set kalibrieren, kurze TTL, Rollen im Key.
 
 # %% [markdown]
 # ### A4 Kostenmodell: 10.000 Anfragen pro Tag

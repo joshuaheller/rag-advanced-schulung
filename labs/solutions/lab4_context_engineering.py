@@ -60,6 +60,11 @@ print(wart.text[:900])
 
 # %% [markdown]
 # ### A3 Der Effekt auf Tabellenfragen (nur Retrieval, ohne LLM)
+#
+# Achtung, Aha-Moment in die andere Richtung: Auf **Dokument-Ebene** (Hit-Rate = richtiges Dokument in den Top-5)
+# findet auch pypdf die Tabellendokumente – die Wörter stehen ja noch drin, nur die Zuordnung Zelle↔Spalte ist weg.
+# Der Unterschied zeigt sich in **p@1/MRR** (welcher Chunk steht oben), in der Lesbarkeit des Kontexts und – bei
+# komplexeren Tabellen als unseren – in der Antwort selbst. Vergleicht die Kontexte aus A1 noch einmal.
 
 # %%
 variants = {
@@ -94,7 +99,9 @@ pd.DataFrame(rows)
 # %% [markdown]
 # ### B2 End-to-End auf Tabellenfragen
 # Lasst `run_golden` (mit Judge) auf den 17 Tabellenfragen laufen – einmal `pypdf+fixed`, einmal `docling+headings`.
-# Wie ändert sich die **Antwort-Korrektheit** (nicht nur die Hit-Rate)?
+# Wie ändert sich die **Antwort-Korrektheit** (nicht nur die Hit-Rate)? Wenn beide gleichauf liegen: Lest euch zwei
+# Antworten samt Kontext an – ein aktuelles Modell rekonstruiert zweispaltige Tabellen aus dem pypdf-Zeilensalat oft
+# korrekt. Was passiert bei einer Tabelle mit fünf Spalten, bei Fußnoten, bei verbundenen Zellen?
 
 # %%
 # === LOESUNG START ===
@@ -165,7 +172,8 @@ print(len(ctx), "Zeichen,", len(used), "Chunks verwendet")
 #
 # ### B4 Re-Ordering messen
 # Vergleicht end-to-end (Judge) `reorder="none"` vs. `"lost_in_middle"` bei **k = 10** auf 15 Fragen.
-# Bei k=5 ist der Effekt meist klein – warum?
+# Bei k=5 ist der Effekt meist klein – warum? Und wenn er auch bei k=10 nicht messbar ist: Was sagt das über
+# aktuelle Modelle vs. die Modelle der Studie von 2023 – und über die Aussagekraft von 15 Fragen?
 
 # %%
 # === LOESUNG START ===
@@ -180,7 +188,7 @@ pd.DataFrame(out).T
 
 # %% [markdown]
 # ### B5 Long-Context statt RAG?
-# Der gesamte Korpus hat ~55.000 Zeichen (~15.000 Tokens) – das passt locker in ein modernes Kontextfenster.
+# Der gesamte Korpus hat ~70.000 Zeichen (~19.000 Tokens) – das passt locker in ein modernes Kontextfenster.
 # Baut eine „Alles-in-den-Kontext“-Variante: ein Hit pro Dokument, `max_chars` sehr groß, und vergleicht auf
 # 10 Fragen **Korrektheit, Latenz und Kosten** mit der RAG-Pipeline. Wann kippt die Rechnung (Stichworte:
 # Korpusgröße, Anfragen/Tag, Context Rot, Zugriffsrechte)?
@@ -212,7 +220,7 @@ pd.DataFrame({
 # ## Teil C – Debrief
 #
 # 1. Welcher Schritt hat auf Tabellenfragen mehr gebracht – Docling oder das Chunking? Was folgt daraus für die
-#    Reihenfolge, in der ihr ein System optimiert?
+#    Reihenfolge, in der ihr ein System optimiert? (Und: Welcher Effekt war überhaupt messbar – Hit@5, p@1, Korrektheit?)
 # 2. Parent-Child erhöht die Kontextlänge. Wo ist die Grenze, ab der Context Noise den Gewinn auffrisst?
 # 3. Long-Context: Bei welcher Korpusgröße und Anfragezahl würdet ihr komplett auf Retrieval verzichten?
 #    (Und was ist mit Zugriffsrechten?)

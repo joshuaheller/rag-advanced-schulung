@@ -11,10 +11,10 @@ source .venv/bin/activate
 python -m pip install --upgrade pip wheel
 
 echo "== PyTorch (CPU-Variante, spart ~2 GB gegenueber der CUDA-Version)"
-pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install "torch==2.14.0" --index-url https://download.pytorch.org/whl/cpu
 
 echo "== Python-Pakete"
-pip install -r requirements.txt
+pip install -r requirements.txt -c constraints.txt
 
 echo "== Jupyter-Kernel registrieren"
 python -m ipykernel install --user --name rag-schulung --display-name "Python (rag-schulung)"

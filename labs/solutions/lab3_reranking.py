@@ -172,8 +172,10 @@ retrieval_summary(evaluate_retrieval(p, golden[:10], ["employee"]))
 # %% [markdown]
 # ## Teil C – Debrief
 #
-# 1. Wie viel Hit-Rate bringt der Reranker – und wie viel Latenz kostet er? Ist das Verhältnis akzeptabel?
-# 2. ColBERT ist primär englisch trainiert. Was habt ihr auf deutschen Texten beobachtet? Was folgt daraus für die Modellwahl?
+# 1. Wie viel p@1/MRR bringt der Reranker – und wie viel Latenz kostet er? Ist das Verhältnis akzeptabel?
+#    (Die Hit-Rate kann er per Definition kaum verbessern – warum?)
+# 2. `quality` (bge-reranker-v2-m3) ist ~10× langsamer als `fast`. Für welchen MRR-Gewinn wäre euch das die Kaskade wert?
+#    ColBERT (primär englisch trainiert) ließ sich im Kurs nicht laden – was würdet ihr auf deutschen Texten erwarten?
 # 3. Anti-Pattern-Check: Reranker auf nur 5 Kandidaten – warum bringt das fast nichts?
 #
 # **Merksatz:** Der Reranker repariert die Reihenfolge, nicht den Recall. Was der Retriever nicht liefert,

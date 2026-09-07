@@ -8,10 +8,10 @@ python -m venv .venv
 python -m pip install --upgrade pip wheel
 
 Write-Host "== PyTorch (CPU)"
-pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install "torch==2.14.0" --index-url https://download.pytorch.org/whl/cpu
 
 Write-Host "== Python-Pakete"
-pip install -r requirements.txt
+pip install -r requirements.txt -c constraints.txt
 
 Write-Host "== Jupyter-Kernel registrieren"
 python -m ipykernel install --user --name rag-schulung --display-name "Python (rag-schulung)"
