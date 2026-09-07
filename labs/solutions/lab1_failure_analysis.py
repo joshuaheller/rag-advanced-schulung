@@ -89,7 +89,7 @@ for fid in df[df["failure"] != "ok"]["id"].head(3):
     it = next(g for g in golden if g["id"] == fid)
     print("\n" + "=" * 100)
     print(fid, "| Heuristik:", df.loc[df.id == fid, "failure"].item())
-    baseline.run(it["question"], user_roles=["employee"]).show(n_chars=150)
+    baseline.run(it["question"], user_roles=["employee"]).show(n_chars=150)  # ? Lauf ausfuehren und mit .show() anzeigen
     print("Referenz:", it["ground_truth"])
 # Beispielkorrektur (an eure Beobachtung anpassen):
 # df.loc[df.id == "g12", "failure"] = "generation:wrong_answer"
@@ -103,10 +103,10 @@ for fid in df[df["failure"] != "ok"]["id"].head(3):
 # %%
 # === LOESUNG START ===
 # HINWEIS: pd.crosstab(df["failure"], df["type"]) oder failure_breakdown(df)
-ct = pd.crosstab(df["failure"], df["type"], margins=True)
+ct = pd.crosstab(df["failure"], df["type"], margins=True)  # ? Kreuztabelle Fehlerklasse x Fragetyp
 display(ct)
 # Retrieval- vs. Generierungsfehler in Summe:
-df["failure"].str.split(":").str[0].value_counts()
+df["failure"].str.split(":").str[0].value_counts()  # ? Praefix vor dem Doppelpunkt zaehlen (retrieval/generation)
 # === LOESUNG ENDE ===
 
 # %% [markdown]
@@ -132,11 +132,11 @@ df["failure"].str.split(":").str[0].value_counts()
 # === LOESUNG START ===
 # HINWEIS: PipelineConfig(retrieval="dense", k=20) und retrieve_only(); first_rank per retrieval_row()
 from ragkurs.eval import retrieval_row
-wide = RAGPipeline(index, PipelineConfig(retrieval="dense", k=20))
+wide = RAGPipeline(index, PipelineConfig(retrieval="dense", k=20))  # ? gleiche Pipeline, aber k=20
 rows = []
 for fid in df[df["failure"].str.startswith("retrieval")]["id"]:
     it = next(g for g in golden if g["id"] == fid)
-    rr = retrieval_row(wide.retrieve_only(it["question"], ["employee"]), it, 20)
+    rr = retrieval_row(wide.retrieve_only(it["question"], ["employee"]), it, 20)  # ? retrieve_only + retrieval_row mit k=20
     rows.append({"id": fid, "type": it["type"], "rank_bei_k20": rr["first_rank"], "recall_k20": rr["recall"]})
 pd.DataFrame(rows)
 # === LOESUNG ENDE ===

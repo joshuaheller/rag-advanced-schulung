@@ -97,12 +97,13 @@ pd.DataFrame(rows)
 results = []
 for kind in ("fast", "quality", "colbert"):
     t0 = time.perf_counter(); get_reranker(kind); load_s = time.perf_counter() - t0
-    p = RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=20, rerank=kind, name=f"rerank:{kind}"))
+    p = RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=20, rerank=kind, name=f"rerank:{kind}"))  # ? Pipeline mit rerank=kind
     df = evaluate_retrieval(p, golden, ["employee"])
     s = retrieval_summary(df)
     results.append({
         "reranker": kind, "hit_rate": s["hit_rate"], "mrr": s["mrr"],
-        "p50_ms": round(df["t_retrieval_ms"].quantile(0.5)), "p95_ms": round(df["t_retrieval_ms"].quantile(0.95)),
+        "p50_ms": round(df["t_retrieval_ms"].quantile(0.5)),  # ? Median der Spalte t_retrieval_ms
+        "p95_ms": round(df["t_retrieval_ms"].quantile(0.95)),  # ? 95 %-Quantil der Spalte t_retrieval_ms
         "modell_laden_s": round(load_s, 1),
     })
 tradeoff = pd.DataFrame(results)
@@ -124,12 +125,12 @@ def cascade(q, roles=("employee",)):
     from ragkurs.index import build_filter
     flt = build_filter(user_roles=list(roles))
     c = index.search_hybrid(q, k=40, prefetch_k=40, query_filter=flt)
-    return qual_r.rerank(q, fast_r.rerank(q, c, top_k=10), top_k=5)
+    return qual_r.rerank(q, fast_r.rerank(q, c, top_k=10), top_k=5)  # ? erst fast auf Top-10, dann quality auf Top-5
 
 def direct(q, roles=("employee",)):
     from ragkurs.index import build_filter
     flt = build_filter(user_roles=list(roles))
-    return qual_r.rerank(q, index.search_hybrid(q, k=40, prefetch_k=40, query_filter=flt), top_k=5)
+    return qual_r.rerank(q, index.search_hybrid(q, k=40, prefetch_k=40, query_filter=flt), top_k=5)  # ? quality direkt auf die 40 Kandidaten
 
 from ragkurs.pipeline import RunResult
 from ragkurs.generate import Answer
@@ -160,7 +161,7 @@ pd.DataFrame(rows).groupby("variante").agg(hit_rate=("hit", "mean"), mrr=("rr", 
 # %%
 # === LOESUNG START ===
 # HINWEIS: PipelineConfig(rerank="llm", prefetch_k=10) ; nur golden[:10] verwenden (Kosten/Zeit)
-p = RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=10, rerank="llm", name="rerank:llm"))
+p = RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=10, rerank="llm", name="rerank:llm"))  # ? rerank="llm", prefetch_k=10
 retrieval_summary(evaluate_retrieval(p, golden[:10], ["employee"]))
 # === LOESUNG ENDE ===
 

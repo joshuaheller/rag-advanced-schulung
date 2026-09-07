@@ -95,13 +95,29 @@ class LLMReranker:
         return _rescored(hits, scores, top_k, self.name)
 
 
+class LexicalReranker:
+    """Offline-Ersatz (FAKE_EMBEDDINGS=1): Token-Ueberlappung statt Modell. Nur fuer Tests ohne Internet."""
+
+    def __init__(self, name: str = "offline-lexical"):
+        self.name = name
+
+    def rerank(self, query: str, hits: list[Hit], top_k: int = 5) -> list[Hit]:
+        from .sparse import tokenize
+
+        q = set(tokenize(query))
+        scores = [len(q & set(tokenize(h.chunk.text))) / (len(q) or 1) for h in hits]
+        return _rescored(hits, scores, top_k, self.name)
+
+
 _registry: dict[str, object] = {}
 
 
 def get_reranker(kind: str):
     """'fast' | 'quality' | 'colbert' | 'llm' (Instanzen werden gecacht - Modelle laden dauert)."""
     if kind not in _registry:
-        if kind == "fast":
+        if settings.fake_embeddings and kind != "llm":
+            _registry[kind] = LexicalReranker(f"offline-{kind}")
+        elif kind == "fast":
             _registry[kind] = CrossEncoderReranker(settings.reranker_fast)
         elif kind == "quality":
             _registry[kind] = CrossEncoderReranker(settings.reranker_quality)

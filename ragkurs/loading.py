@@ -66,6 +66,10 @@ _docling_converter = None
 
 def _read_pdf_docling(path: Path) -> str:
     global _docling_converter
+    if settings.fake_embeddings:  # Offline-Modus: Markdown-Original statt Docling (nur fuer Tests ohne Internet)
+        src = path.parent.parent / "corpus_src" / (path.stem + ".md")
+        if src.exists():
+            return split_frontmatter(src.read_text(encoding="utf-8"))[1]
     if _docling_converter is None:
         from docling.document_converter import DocumentConverter
 

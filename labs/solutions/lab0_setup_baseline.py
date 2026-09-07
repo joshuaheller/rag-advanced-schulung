@@ -114,12 +114,12 @@ result.show()
 # HINWEIS: golden ist eine Liste von Dicts; result.retrieved_doc_ids zeigt die Dokumente im Kontext.
 for typ in ("faktisch", "near-miss", "negativ"):
     item = next(g for g in golden if g["type"] == typ)
-    r = baseline.run(item["question"], user_roles=["employee"])
+    r = baseline.run(item["question"], user_roles=["employee"])  # ? Pipeline mit der Frage aufrufen (Rolle employee)
     print(f"\n=== {typ} | {item['id']} ===")
     print("Frage    :", item["question"])
     print("Antwort  :", r.answer.text)
     print("Referenz :", item["ground_truth"])
-    print("Quellen im Kontext:", r.retrieved_doc_ids, "| erwartet:", item["source_docs"])
+    print("Quellen im Kontext:", r.retrieved_doc_ids, "| erwartet:", item["source_docs"])  # ? gefundene vs. erwartete Dokumente ausgeben
 # === LOESUNG ENDE ===
 
 # %% [markdown]
@@ -131,8 +131,8 @@ from ragkurs.eval import evaluate_retrieval, retrieval_summary
 
 # === LOESUNG START ===
 # HINWEIS: evaluate_retrieval(pipeline, golden, user_roles) -> DataFrame; retrieval_summary(df) -> Kennzahlen
-df_base = evaluate_retrieval(baseline, golden, user_roles=["employee"])
-retrieval_summary(df_base)
+df_base = evaluate_retrieval(baseline, golden, user_roles=["employee"])  # ? Retrieval-Evaluation auf dem Golden Set
+retrieval_summary(df_base)  # ? Kennzahlen zusammenfassen
 # === LOESUNG ENDE ===
 
 # %%

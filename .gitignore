@@ -16,3 +16,5 @@ labs/**/outputs/
 # von Labs 5/7 erzeugte Dateien (Teilnehmer-Artefakte)
 data/golden/golden_set_team.jsonl
 data/golden/candidates.jsonl
+labs/solutions/executed/
+run_report.md

@@ -31,7 +31,11 @@ class OfflineChatModel(BaseChatModel):
 
     def _generate(self, messages, stop=None, run_manager=None, **kwargs) -> ChatResult:
         text = messages[-1].content if messages else ""
-        if '"correct"' in text:
+        if '"question"' in text and '"ground_truth"' in text:
+            out = '{"question": "Offline-Testfrage?", "ground_truth": "Offline-Referenzantwort."}'
+        elif '"verdaechtig"' in text:
+            out = '{"verdaechtig": true, "grund": "Offline-Modus"}'
+        elif '"correct"' in text:
             out = '{"correct": false, "reason": "Offline-Modus - kein LLM verfuegbar"}'
         elif "JSON-Liste der Passagen" in text:
             out = "[1, 2, 3, 4, 5]"

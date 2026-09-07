@@ -6,6 +6,7 @@
 
 LangChain- und OpenAI-Aufrufe werden automatisch instrumentiert (OpenInference);
 zusaetzlich legt `traced_run` einen Eltern-Span "rag.run" mit unseren Pipeline-Attributen an.
+Schlaegt der Phoenix-Start fehl (Port belegt, kein Netz), laufen die Labs ohne UI weiter.
 """
 from __future__ import annotations
 
@@ -13,18 +14,29 @@ import json
 
 _tracer_provider = None
 _session = None
+_disabled = False
 
 
 def start_phoenix(project_name: str = "rag-schulung", port: int = 6006) -> str:
-    global _tracer_provider, _session
-    import phoenix as px
-    from phoenix.otel import register
+    """Startet Phoenix lokal und registriert die OpenTelemetry-Instrumentierung."""
+    global _tracer_provider, _session, _disabled
+    try:
+        import phoenix as px
+        from phoenix.otel import register
 
-    if _session is None:
-        _session = px.launch_app(port=port)
-    if _tracer_provider is None:
-        _tracer_provider = register(project_name=project_name, endpoint=f"http://localhost:{port}/v1/traces", auto_instrument=True)
-    return str(_session.url)
+        if _session is None:
+            _session = px.launch_app(port=port)
+        if _tracer_provider is None:
+            _tracer_provider = register(project_name=project_name, endpoint=f"http://localhost:{port}/v1/traces", auto_instrument=True, verbose=False)
+        _disabled = False
+        return str(_session.url)
+    except Exception as e:  # noqa: BLE001
+        _disabled = True
+        print(
+            f"[tracing] Phoenix konnte nicht gestartet werden ({type(e).__name__}: {e}). "
+            "Tipp: start_phoenix(port=6007) oder Kernel neu starten. Die Labs laufen ohne UI weiter."
+        )
+        return "(kein Phoenix - siehe Hinweis)"
 
 
 def get_tracer(name: str = "ragkurs"):
@@ -35,6 +47,9 @@ def get_tracer(name: str = "ragkurs"):
 
 def traced_run(pipeline, query: str, user_roles: list[str] | None = None):
     """Fuehrt pipeline.run in einem Eltern-Span aus und haengt Trace-Infos als Attribute an."""
+    if _disabled or _tracer_provider is None:
+        return pipeline.run(query, user_roles)
+
     from openinference.semconv.trace import SpanAttributes
 
     tracer = get_tracer()

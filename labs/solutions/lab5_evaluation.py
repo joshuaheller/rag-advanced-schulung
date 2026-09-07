@@ -116,7 +116,8 @@ print(subprocess.run([sys.executable, "-m", "pytest", "tests", "-q", "-k", "retr
 #
 # ### B1 Golden Set erweitern
 # Schreibt **fünf eigene Fragen** zum Korpus (mindestens eine unbeantwortbare, eine Multi-Hop) als JSONL nach
-# `data/golden/golden_set_team.jsonl` – Format wie `golden_set.jsonl`. Lasst `best` darauf laufen.
+# `data/golden/golden_set_team.jsonl` – Format wie `golden_set.jsonl`. Die Liste unten ist eine Vorlage: **ersetzt die fünf
+# Beispiele durch eure eigenen Fragen** (Antwort im Korpus nachschlagen!) und lasst `best` darauf laufen.
 
 # %%
 # === LOESUNG START ===
@@ -131,7 +132,7 @@ team = [
 with open("data/golden/golden_set_team.jsonl", "w", encoding="utf-8") as f:
     for t in team:
         f.write(json.dumps(t, ensure_ascii=False) + "\n")
-df_team = run_golden(best, load_golden(path="data/golden/golden_set_team.jsonl"), ["employee"])
+df_team = run_golden(best, load_golden(path="data/golden/golden_set_team.jsonl"), ["employee"])  # ? eigenes Set laden und mit best ausfuehren
 df_team[["id", "type", "correct", "failure", "answer"]]
 # === LOESUNG ENDE ===
 
@@ -147,9 +148,9 @@ df_team[["id", "type", "correct", "failure", "answer"]]
 human_labels = {k: True for k in human_labels}         # <- im Lab durch echte Urteile ersetzen
 sub = df_base.head(8).copy()
 sub["human"] = sub["id"].map(human_labels)
-tp = ((sub["correct"]) & (sub["human"])).sum()
-precision = tp / max(1, sub["correct"].sum())
-recall = tp / max(1, sub["human"].sum())
+tp = ((sub["correct"]) & (sub["human"])).sum()  # ? True Positives: Judge korrekt UND Mensch korrekt
+precision = tp / max(1, sub["correct"].sum())  # ? TP / alle Judge-korrekt
+recall = tp / max(1, sub["human"].sum())  # ? TP / alle Mensch-korrekt
 agreement = (sub["correct"] == sub["human"]).mean()
 print(f"Judge vs. Mensch: precision={precision:.2f} recall={recall:.2f} agreement={agreement:.2f}")
 sub[sub["correct"] != sub["human"]][["id", "answer", "ground_truth", "judge_reason"]]
@@ -165,9 +166,9 @@ sub[sub["correct"] != sub["human"]][["id", "answer", "ground_truth", "judge_reas
 # === LOESUNG START ===
 # HINWEIS: Beide DataFrames per "id" mergen; Regression = vorher correct, jetzt nicht
 def regression_gate(df_candidate, df_reference, max_drop=0.05):
-    m = df_reference[["id", "correct"]].merge(df_candidate[["id", "correct"]], on="id", suffixes=("_ref", "_cand"))
-    drop = m["correct_ref"].mean() - m["correct_cand"].mean()
-    regressed = m[(m["correct_ref"]) & (~m["correct_cand"])]["id"].tolist()
+    m = df_reference[["id", "correct"]].merge(df_candidate[["id", "correct"]], on="id", suffixes=("_ref", "_cand"))  # ? beide DataFrames ueber id mergen, Suffixe _ref/_cand
+    drop = m["correct_ref"].mean() - m["correct_cand"].mean()  # ? Differenz der Korrektheits-Mittelwerte
+    regressed = m[(m["correct_ref"]) & (~m["correct_cand"])]["id"].tolist()  # ? IDs: vorher korrekt, jetzt nicht
     ok = drop <= max_drop and not regressed
     print(f"Korrektheit ref={m['correct_ref'].mean():.2f} cand={m['correct_cand'].mean():.2f} drop={drop:+.2f} | Regressionen: {regressed} -> {'PASS' if ok else 'FAIL'}")
     return ok

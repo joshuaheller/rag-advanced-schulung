@@ -139,13 +139,13 @@ pd.DataFrame(rows).round(2)
 def check_alerts(df, baseline_df=None, window=20):
     alerts = []
     recent = df.tail(window)
-    if recent["no_answer"].mean() > 0.20:
+    if recent["no_answer"].mean() > 0.20:  # ? No-Answer-Rate im Fenster > 20 %
         alerts.append(f"No-Answer-Rate {recent['no_answer'].mean():.0%} in den letzten {len(recent)} Anfragen")
-    p95 = df["t_total_ms"].quantile(0.95)
+    p95 = df["t_total_ms"].quantile(0.95)  # ? 95 %-Quantil der Gesamtlatenz
     if p95 > 4000:
         alerts.append(f"p95-Latenz {p95:.0f} ms > 4000 ms")
     base = (baseline_df if baseline_df is not None else df)["top_score"].quantile(0.10)
-    low = (recent["top_score"] < base).mean()
+    low = (recent["top_score"] < base).mean()  # ? Anteil der Anfragen unter der Baseline-Schwelle
     if low > 0.30:
         alerts.append(f"{low:.0%} der Anfragen mit Top-Score < {base:.3f} (Wissenslücke oder Off-Topic?)")
     return alerts or ["keine Alerts"]
@@ -164,14 +164,14 @@ check_alerts(log)
 # === LOESUNG START ===
 # HINWEIS: compare_retrieval([pipe_v1, pipe_v2], golden, ["employee"]) ; Umschalten = pipe.index = neue_collection
 from ragkurs.eval import compare_retrieval
-index_v2 = HybridIndex(collection="ops_v2").build(chunk_by_headings(docs, max_chars=800))
+index_v2 = HybridIndex(collection="ops_v2").build(chunk_by_headings(docs, max_chars=800))  # ? zweite Collection mit max_chars=800
 v1 = RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=20, rerank="fast", name="v1 (1500)"))
 v2 = RAGPipeline(index_v2, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=20, rerank="fast", name="v2 (800)"))
 display(compare_retrieval([v1, v2], golden, ["employee"]))
 
 active = {"index": index}                     # in Produktion: Alias in Qdrant (update_collection_aliases) statt Python-Dict
 def switch(new_index):
-    old = active["index"]; active["index"] = new_index; pipe.index = new_index
+    old = active["index"]; active["index"] = new_index; pipe.index = new_index  # ? aktiven Index merken und umschalten
     print(f"umgeschaltet: {old.collection} -> {new_index.collection} ({new_index.count()} Chunks)")
 switch(index_v2)
 # Beim Embedding-Modellwechsel zusätzlich: Embedding-Cache invalidieren (.cache/embeddings_*.jsonl), Query-Embedding mit
@@ -195,8 +195,9 @@ feedback = [
 ]
 with open("data/golden/candidates.jsonl", "a", encoding="utf-8") as f:
     for i, fb in enumerate(feedback, start=1):
-        f.write(json.dumps({"id": f"c{int(time.time())}{i}", "type": "feedback", "question": fb["question"], "ground_truth": fb["expected"],
-                            "source_docs": fb["source_docs"], "answerable": True, "reviewed": False}, ensure_ascii=False) + "\n")
+            rec = {"id": f"c{int(time.time())}{i}", "type": "feedback", "question": fb["question"], "ground_truth": fb["expected"],
+                   "source_docs": fb["source_docs"], "answerable": True, "reviewed": False}
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")  # ? Kandidat als JSON-Zeile anhaengen (ensure_ascii=False)
 print(open("data/golden/candidates.jsonl", encoding="utf-8").read()[-600:])
 # Prozess: wöchentliches Review durch Fachbereich -> reviewed=true -> Merge ins Golden Set -> CI-Regressionstest bei jedem PR.
 # === LOESUNG ENDE ===
@@ -213,7 +214,7 @@ p_no = RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=20,
 for g in golden[:20]:
     p_no.retrieve_only(g["question"], ["employee"]); pipe.retrieve_only(g["question"], ["employee"])
 rr_ms = pd.Series([r.trace.get("t_rerank_ms", 0) for r in [pipe.retrieve_only(g["question"], ["employee"]) for g in golden[:20]]])
-cpu_s_per_day = rr_ms.mean() / 1000 * 10_000
+cpu_s_per_day = rr_ms.mean() / 1000 * 10_000  # ? mittlere Reranker-Sekunden x 10.000 Anfragen
 peak_rps = 10_000 / (8 * 3600) * 3        # Annahme: 3x Durchschnitt im Peak, 8-Stunden-Tag
 print(f"Reranker p50={rr_ms.median():.0f} ms, p95={rr_ms.quantile(0.95):.0f} ms -> {cpu_s_per_day:.0f} CPU-Sekunden/Tag; "
       f"Peak {peak_rps:.2f} req/s -> ~{max(1, round(peak_rps * rr_ms.quantile(0.95) / 1000))} Worker für den Reranker allein")

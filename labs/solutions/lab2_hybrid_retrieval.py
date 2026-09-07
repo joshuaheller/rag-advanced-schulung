@@ -114,7 +114,7 @@ print("HyDE     :", qt.hyde(frage)[:300], "...")
 # === LOESUNG START ===
 # HINWEIS: compare_retrieval([...], golden, ["employee"]) mit mehreren PipelineConfig-Varianten
 variants = [
-    RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=pk, fusion=f, name=f"hybrid/{f}/pf{pk}"))
+    RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=pk, fusion=f, name=f"hybrid/{f}/pf{pk}"))  # ? PipelineConfig mit fusion=f und prefetch_k=pk
     for f in ("rrf", "dbsf") for pk in (10, 20, 50)
 ]
 compare_retrieval(variants, golden, user_roles=["employee"])
@@ -130,7 +130,7 @@ compare_retrieval(variants, golden, user_roles=["employee"])
 # === LOESUNG START ===
 # HINWEIS: PipelineConfig(retrieval="hybrid", query_transform="multi", ...) ; nach Typ: df.groupby("type")["hit"].mean()
 qt_pipes = [
-    RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=20, query_transform=t, name=f"hybrid+{t or 'none'}"))
+    RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=20, query_transform=t, name=f"hybrid+{t or 'none'}"))  # ? PipelineConfig mit query_transform=t
     for t in (None, "rewrite", "multi", "decompose", "hyde")
 ]
 summary = compare_retrieval(qt_pipes, golden, user_roles=["employee"])
@@ -150,7 +150,7 @@ by_type
 # HINWEIS: PipelineConfig(status_filter=None) vs. Standard; retrieve_only(...).retrieved_doc_ids
 q18 = next(g for g in golden if g["id"] == "g18")["question"]
 for sf in ("current", None):
-    p = RAGPipeline(index, PipelineConfig(retrieval="sparse", k=3, status_filter=sf))
+    p = RAGPipeline(index, PipelineConfig(retrieval="sparse", k=3, status_filter=sf))  # ? Pipeline mit status_filter=sf
     print(f"status_filter={sf!s:8s} ->", p.retrieve_only(q18, ["employee"]).retrieved_doc_ids)
 # === LOESUNG ENDE ===
 
@@ -166,8 +166,8 @@ for sf in ("current", None):
 from ragkurs.chunking import add_contextual_prefix
 hr_chunks = [c for c in chunks if c.metadata.get("department") == "HR"]
 other = [c for c in chunks if c.metadata.get("department") != "HR"]
-ctx_chunks = add_contextual_prefix(hr_chunks, docs) + other
-ctx_index = HybridIndex(collection="lab2ctx").build(ctx_chunks)
+ctx_chunks = add_contextual_prefix(hr_chunks, docs) + other  # ? HR-Chunks anreichern, Rest unveraendert anhaengen
+ctx_index = HybridIndex(collection="lab2ctx").build(ctx_chunks)  # ? neuen Index bauen
 hr_golden = [g for g in golden if any(s.startswith("hr-") for s in g["source_docs"])]
 compare_retrieval(
     [RAGPipeline(index, PipelineConfig(retrieval="hybrid", name="hybrid")),

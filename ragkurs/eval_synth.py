@@ -68,7 +68,7 @@ def generate_synthetic_testset(docs: list[Document], n: int = 10, multi_hop_shar
             src, typ = [c.doc_id], "synthetic"
         if d:
             rows.append({"id": f"s{i + 1:02d}", "type": typ, "question": d["question"], "ground_truth": d["ground_truth"], "source_docs": src, "answerable": True, "reviewed": False})
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows, columns=["id", "type", "question", "ground_truth", "source_docs", "answerable", "reviewed"])
 
 
 def save_as_golden(df: pd.DataFrame, path) -> None:

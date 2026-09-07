@@ -83,10 +83,10 @@ compare_retrieval(pipes, tabellen, user_roles=["employee"])
 # HINWEIS: Kontextlänge = sum(len(h.chunk.text) for h in pipe.retrieve_only(q).hits)
 rows = []
 for mc in (400, 800, 1500, 3000):
-    ch = chunk_by_headings(docs_docling, max_chars=mc)
+    ch = chunk_by_headings(docs_docling, max_chars=mc)  # ? Chunking mit max_chars=mc
     p = RAGPipeline(HybridIndex(collection=f"mc{mc}").build(ch), PipelineConfig(retrieval="hybrid", k=5))
     s = retrieval_summary(evaluate_retrieval(p, golden, ["employee"]))
-    ctx = [sum(len(h.chunk.text) for h in p.retrieve_only(g["question"], ["employee"]).hits) for g in golden[:15]]
+    ctx = [sum(len(h.chunk.text) for h in p.retrieve_only(g["question"], ["employee"]).hits) for g in golden[:15]]  # ? Zeichen der Top-5-Chunks je Frage summieren
     rows.append({"max_chars": mc, "chunks": len(ch), "hit_rate": s["hit_rate"], "mrr": s["mrr"], "avg_kontext_zeichen": round(sum(ctx) / len(ctx))})
 pd.DataFrame(rows)
 # === LOESUNG ENDE ===
@@ -101,7 +101,7 @@ pd.DataFrame(rows)
 # HINWEIS: run_golden(pipe, tabellen, ["employee"], verbose=False) -> e2e_summary(df)
 res = {}
 for p in (pipes[0], pipes[2]):
-    df = run_golden(p, tabellen, ["employee"], verbose=False)
+    df = run_golden(p, tabellen, ["employee"], verbose=False)  # ? End-to-End-Lauf mit Judge auf den Tabellenfragen
     res[p.config.label()] = e2e_summary(df)
 pd.DataFrame(res).T
 # === LOESUNG ENDE ===
@@ -113,7 +113,7 @@ pd.DataFrame(res).T
 
 # %%
 # === LOESUNG START ===
-# HINWEIS: near_miss = [g for g in golden if g["type"] == "near-miss"]
+# HINWEIS: near_miss = [g for g in golden if g["type"] == "near-miss"]  # ? nur Fragen vom Typ near-miss
 near_miss = [g for g in golden if g["type"] == "near-miss"]
 compare_retrieval(
     [RAGPipeline(HybridIndex(collection="bc1").build(chunk_by_headings(docs_docling, breadcrumb=True)), PipelineConfig(retrieval="hybrid", name="mit breadcrumb")),
@@ -173,7 +173,7 @@ print(len(ctx), "Zeichen,", len(used), "Chunks verwendet")
 idx_flat = flat.index
 out = {}
 for ro in ("none", "lost_in_middle"):
-    p = RAGPipeline(idx_flat, PipelineConfig(retrieval="hybrid", k=10, prefetch_k=25, reorder=ro, max_context_chars=12000, name=f"k10+{ro}"))
+    p = RAGPipeline(idx_flat, PipelineConfig(retrieval="hybrid", k=10, prefetch_k=25, reorder=ro, max_context_chars=12000, name=f"k10+{ro}"))  # ? k=10, reorder=ro, max_context_chars=12000
     out[p.config.label()] = e2e_summary(run_golden(p, golden[:15], ["employee"], verbose=False))
 pd.DataFrame(out).T
 # === LOESUNG ENDE ===
@@ -197,8 +197,8 @@ from ragkurs.pipeline import estimate_cost
 all_hits = [Hit(Chunk(d.doc_id, d.doc_id, d.text, {"title": d.title, "version": d.metadata.get("version", "")}), 1.0, i + 1) for i, d in enumerate(docs_docling) if d.metadata.get("status") == "current"]
 rows = []
 for g in golden[:10]:
-    t0 = time.perf_counter(); a = gen_answer(g["question"], all_hits, max_chars=10**7); ms = (time.perf_counter() - t0) * 1000
-    j = judge_correctness(g["question"], a.text, g["ground_truth"])
+    t0 = time.perf_counter(); a = gen_answer(g["question"], all_hits, max_chars=10**7); ms = (time.perf_counter() - t0) * 1000  # ? gen_answer mit ALLEN Dokumenten als Hits und sehr grossem max_chars, Zeit messen
+    j = judge_correctness(g["question"], a.text, g["ground_truth"])  # ? Judge auf die Antwort
     rows.append({"id": g["id"], "correct": j["correct"], "ms": round(ms), "input_tokens": a.usage.get("input_tokens"), "cost_usd": estimate_cost(a.usage)})
 lc = pd.DataFrame(rows)
 rag = run_golden(flat, golden[:10], ["employee"], verbose=False)

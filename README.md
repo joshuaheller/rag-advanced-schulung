@@ -45,8 +45,15 @@ Systemvoraussetzungen: Python 3.11/3.12, 16 GB RAM (min. 8), ~10 GB Platte (Pake
 | 6 | Security: Poisoning, Injection, Ingest-Gate, Permission-aware Retrieval | 35 Min |
 | 7 | Betrieb: Phoenix-Tracing, Dashboard, Semantic Cache, Kosten, Blue/Green-Reindex | 30 Min |
 
-Jedes Notebook: **Teil A** Walkthrough (Trainer führt vor, alle führen mit aus) → **Teil B** Aufgaben (TODO-Zellen,
-Lösungen in `labs/solutions/`) → **Teil C** Debrief-Fragen.
+Jedes Notebook: **Teil A** Walkthrough (Trainer führt vor, alle führen mit aus) → **Teil B** Aufgaben → **Teil C** Debrief-Fragen.
+
+**Aufgabenformat (Teil B):** Fill-in-the-blank. Der Code-Rahmen steht, an 1–4 markierten Stellen fehlt eine Zeile
+(`variable = ...  # TODO: <Hinweis>`). Jedes Notebook hat direkt nach der ersten Zelle einen **API-Spickzettel** mit allen
+Funktionen, die in diesem Lab gebraucht werden (Gesamtübersicht: `docs/CHEATSHEET.md`). `funktion??` zeigt den Quelltext.
+Musterlösungen: `labs/solutions/`.
+
+**Kompletter Testlauf** (Trainer, vor dem Kurs): `python scripts/run_all_labs.py` führt alle Lösungs-Notebooks mit echten
+Modellen aus und schreibt `run_report.md` (Fehler je Zelle, Laufzeiten, Ergebnistabellen). Dauer 45–90 Min, ca. 2–4 USD.
 
 ## Technischer Stack
 
