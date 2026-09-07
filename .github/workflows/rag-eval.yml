@@ -1,0 +1,50 @@
+# Eval als Quality Gate (Lab 5, Block 5.10)
+#
+# - Bei jedem Push/PR: deterministische Retrieval-Tests (kostenlos, ohne API-Key)
+# - Zusaetzlich End-to-End- und DeepEval-Tests, wenn das Repo-Secret OPENAI_API_KEY gesetzt ist
+#   (Kosten begrenzen: festes Subset von 10 Fragen, guenstiges Modell als Generator, Judge nur auf dem Subset)
+name: rag-eval
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  retrieval-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Minimal-Abhaengigkeiten (ohne Torch/Docling)
+        run: |
+          pip install python-dotenv pyyaml numpy pandas pypdf qdrant-client langchain-core langchain-openai langchain-text-splitters pytest
+      - name: Retrieval-Tests (kein API-Key noetig)
+        env:
+          FAKE_EMBEDDINGS: "1"
+        run: pytest tests -q -k retrieval
+
+  llm-eval:
+    runs-on: ubuntu-latest
+    needs: retrieval-tests
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Abhaengigkeiten
+        run: |
+          pip install python-dotenv pyyaml numpy pandas pypdf qdrant-client langchain-core langchain-openai langchain-text-splitters pytest deepeval
+      - name: End-to-End- und DeepEval-Tests (nur mit Secret)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then echo "Kein OPENAI_API_KEY-Secret - LLM-Tests uebersprungen"; exit 0; fi
+          pytest tests -q -k "e2e or deepeval"

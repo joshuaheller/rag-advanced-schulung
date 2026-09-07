@@ -1,0 +1,8 @@
+doc_id: it-sicherheitsrichtlinie
+title: IT-Sicherheitsrichtlinie
+department: IT
+access:
+- all
+version: 2025-11
+valid_from: 2025-11-01
+status: current

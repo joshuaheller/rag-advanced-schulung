@@ -1,0 +1,18 @@
+.env
+.venv/
+venv/
+.cache/
+.qdrant/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.deepeval/
+deepeval-results/
+labs/**/outputs/
+*.log
+.DS_Store
+
+# von Labs 5/7 erzeugte Dateien (Teilnehmer-Artefakte)
+data/golden/golden_set_team.jsonl
+data/golden/candidates.jsonl

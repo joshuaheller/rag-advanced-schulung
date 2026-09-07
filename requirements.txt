@@ -1,0 +1,42 @@
+# --- Kern ---
+python-dotenv>=1.0
+pyyaml>=6.0
+numpy>=1.26
+pandas>=2.2
+pypdf>=5.0
+qdrant-client>=1.12
+langchain-core>=1.0
+langchain-openai>=1.0
+langchain-text-splitters>=1.0
+openai>=1.50
+tiktoken>=0.8
+
+# --- Reranker / Modelle (Open Source, Download von Hugging Face beim ersten Aufruf) ---
+sentence-transformers>=3.0
+rerankers[transformers]>=0.6
+transformers>=4.45
+
+# --- Parsing ---
+docling>=2.10
+
+# --- Evaluation ---
+# (Ragas ist NICHT enthalten: pinnt aeltere LangChain/OpenAI-Versionen, Konflikt mit deepeval/langchain 1.x.
+#  Die Ragas-Metriken sind in ragkurs/metrics.py nachgebaut; Ragas optional via requirements-optional.txt in eigenem venv.)
+deepeval>=4.0
+pytest>=8.0
+
+# --- Observability (lokal, kein Account) ---
+arize-phoenix>=8.0
+arize-phoenix-otel>=0.6
+openinference-instrumentation-langchain>=0.1.30
+openinference-instrumentation-openai>=0.1.20
+
+# --- Notebooks ---
+jupyterlab>=4.2
+ipykernel>=6.29
+ipywidgets>=8.1
+matplotlib>=3.9
+jupytext>=1.16
+
+# --- nur fuer scripts/build_corpus_pdfs.py ---
+reportlab>=4.0

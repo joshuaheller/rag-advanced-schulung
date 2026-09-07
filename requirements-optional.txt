@@ -1,0 +1,3 @@
+# Optional - in einem SEPARATEN venv installieren (Versionskonflikte mit dem Kurs-Stack):
+#   python -m venv .venv-ragas && source .venv-ragas/bin/activate && pip install -r requirements-optional.txt
+ragas>=0.2.10
