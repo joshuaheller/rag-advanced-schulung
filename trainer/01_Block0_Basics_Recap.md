@@ -40,10 +40,10 @@ sicher wirken: Folien 0.4–0.6 in 5 Min durchgehen, Zeit für Lab 1 gewinnen.
 
 ## Walkthrough (Teil A) – Sprechtext-Stichpunkte
 - A1: „Erst schauen, dass alle denselben Stand haben.“ Modelle zeigen, Key vorhanden.
-- A2: Korpus vorstellen: „Fiktiver Maschinenbauer, 25 Dokumente – aber mit den Fallen, die eure echten Korpora auch
+- A2: Korpus vorstellen: „Fiktiver Maschinenbauer, 42 Dokumente – aber mit den Fallen, die eure echten Korpora auch
   haben.“ Die 5 Fallen nennen (Near-Miss, Stale, ACL, Multi-Hop, Tabellen). PDF-Ausgabe zeigen: „Das ist, was pypdf
   aus einer Tabelle macht – jede Zelle eine Zeile, Zuordnung weg.“
-- A3: Golden Set: „50 Fragen, wir wissen die richtige Antwort. Ohne so etwas ist jede Optimierung Raten.“
+- A3: Golden Set: „64 Fragen, wir wissen die richtige Antwort. Ohne so etwas ist jede Optimierung Raten.“
 - A4: Baseline bauen, eine Frage stellen, `result.show()` → Treffer mit Scores, Zeiten, Tokens. „Das `trace` ist
   unser Röntgenbild – Block 1 lebt davon.“
 

@@ -17,7 +17,7 @@ Alle Funktionen, die in den Labs gebraucht werden, mit Signatur und Beispiel. Im
 from ragkurs import load_corpus, chunk_fixed, HybridIndex, RAGPipeline, PipelineConfig
 from ragkurs.eval import load_golden, evaluate_retrieval, retrieval_summary
 
-docs   = load_corpus()                                   # 25 Documents; load_corpus(pdf_parser="docling") ab Lab 4
+docs   = load_corpus()                                   # 42 Documents; load_corpus(pdf_parser="docling") ab Lab 4
 chunks = chunk_fixed(docs, chunk_size=800, chunk_overlap=100)
 index  = HybridIndex(collection="baseline").build(chunks)
 pipe   = RAGPipeline(index, PipelineConfig(retrieval="dense", k=5, name="baseline"))
@@ -26,7 +26,7 @@ result = pipe.run("Frage?", user_roles=["employee"])    # Retrieval + Antwort;  
 result.answer.text            # Antworttext          result.retrieved_doc_ids   # ['hr-urlaubsrichtlinie', ...]
 result.trace["t_total_ms"]    # Zeiten, Tokens, Kosten, Kandidaten
 
-golden = load_golden()                                   # 50 Fragen; load_golden(types=["tabelle"]) / ids=[...] / answerable=False
+golden = load_golden()                                   # 64 Fragen; load_golden(types=["tabelle"]) / ids=[...] / answerable=False
 item = next(g for g in golden if g["id"] == "g33")       # eine bestimmte Frage
 df  = evaluate_retrieval(pipe, golden, user_roles=["employee"])   # nur Retrieval, kein LLM -> DataFrame (hit, recall, first_rank, ...)
 retrieval_summary(df)                                    # {'hit_rate': .., 'recall': .., 'mrr': .., 'avg_ms': ..}

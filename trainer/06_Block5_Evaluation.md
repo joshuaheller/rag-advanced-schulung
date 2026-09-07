@@ -71,7 +71,7 @@ Judge + Nutzerfeedback. Beides speist das Golden Set (Block 7 Feedback-Loop).
   `valid_from`; bei Reisekosten 2027 werden g18–g21 zu neuen Referenzen.
 
 ## Stolperfallen
-- `RagMetrics.evaluate` auf 15 Fragen ≈ 90 Judge-Calls (~3 Min, ~0,20 USD). Nicht auf 50 Fragen im Lab.
+- `RagMetrics.evaluate` auf 15 Fragen ≈ 90 Judge-Calls (~3 Min, ~0,20 USD). Nicht auf 64 Fragen im Lab.
 - `pytest` im Notebook via subprocess: `cwd` ist das Repo-Root (Notebooks wechseln beim Start dorthin).
 - DeepEval-Tests (Ebene 3) brauchen den Key und dauern ~30 s – im Lab nur zeigen, nicht laufen lassen, falls Zeit knapp.
 

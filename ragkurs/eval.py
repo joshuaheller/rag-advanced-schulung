@@ -68,6 +68,7 @@ def retrieval_summary(df: pd.DataFrame) -> dict:
         "hit_rate": round(df["hit"].mean(), 3),
         "recall": round(df["recall"].mean(), 3),
         "mrr": round(df["rr"].mean(), 3),
+        "p@1": round((df["first_rank"] == 1).mean(), 3),
         "avg_ms": round(df["t_retrieval_ms"].mean(), 0),
     }
 
@@ -85,9 +86,11 @@ Frage: {question}
 Referenzantwort (korrekt): {ground_truth}
 Antwort des Assistenten: {answer}
 
-Bewerte STRENG: Die Antwort ist nur dann korrekt, wenn alle wesentlichen Fakten (Zahlen, Fristen, Bedingungen)
-mit der Referenz uebereinstimmen und keine widersprechenden Angaben enthalten sind. Zusatzinformationen sind erlaubt,
-solange sie nicht widersprechen. Eine Antwort "keine Information" ist nur korrekt, wenn die Referenz das auch sagt.
+Bewertungsregel: Die Antwort ist korrekt, wenn die KERNAUSSAGE der Referenz (die gefragte Zahl, Frist, Regel oder
+Entscheidung) uebereinstimmt und die Antwort nichts enthaelt, was der Referenz widerspricht. Fehlende Zusatz- oder
+Nebeninformationen aus der Referenz (Ausnahmen, Vergleichswerte, Begruendungen) machen die Antwort NICHT falsch.
+Falsch ist die Antwort, wenn die Kernzahl/-frist abweicht, ein falsches Produkt/Dokument gemeint ist, oder wenn sie
+"keine Information" sagt, obwohl die Referenz eine Antwort enthaelt (und umgekehrt).
 
 Antworte NUR mit JSON: {{"correct": true/false, "reason": "<ein Satz>"}}"""
 

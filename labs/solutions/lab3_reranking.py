@@ -89,14 +89,18 @@ pd.DataFrame(rows)
 # Hit-Rate, MRR, **p50/p95-Latenz pro Anfrage** und geschätzte **Kosten pro 1.000 Anfragen**
 # (lokale Modelle: CPU-Zeit; LLM: Tokens). Die Latenzen stehen in `t_retrieval_ms` des Retrieval-DataFrames.
 #
-# Hinweis: `quality` (2,2 GB) braucht auf CPU spürbar länger – das *ist* der Punkt der Übung.
+# Hinweis: `quality` (2,2 GB) braucht auf CPU spürbar länger – das *ist* der Punkt der Übung. Falls `colbert` mit einer
+# Fehlermeldung übersprungen wird (Bibliothekskonflikt), ist das erwartet – das Konzept steht auf den Folien.
 
 # %%
 # === LOESUNG START ===
 # HINWEIS: evaluate_retrieval(...)["t_retrieval_ms"].quantile(0.95) ; get_reranker("quality") lädt das große Modell
 results = []
 for kind in ("fast", "quality", "colbert"):
-    t0 = time.perf_counter(); get_reranker(kind); load_s = time.perf_counter() - t0
+    try:
+        t0 = time.perf_counter(); get_reranker(kind); load_s = time.perf_counter() - t0
+    except RuntimeError as e:          # ColBERT: bekannter Bibliothekskonflikt (rerankers vs. transformers 5) -> ueberspringen
+        print(f"{kind}: uebersprungen - {str(e)[:120]}"); continue
     p = RAGPipeline(index, PipelineConfig(retrieval="hybrid", k=5, prefetch_k=20, rerank=kind, name=f"rerank:{kind}"))  # ? Pipeline mit rerank=kind
     df = evaluate_retrieval(p, golden, ["employee"])
     s = retrieval_summary(df)

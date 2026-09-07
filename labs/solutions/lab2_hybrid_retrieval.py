@@ -124,7 +124,7 @@ compare_retrieval(variants, golden, user_roles=["employee"])
 # ### B2 Query-Transformationen messen
 # Baut Hybrid-Pipelines mit `query_transform` ∈ {None, "rewrite", "multi", "decompose", "hyde"} und vergleicht
 # Hit-Rate **und** Latenz. Achtet besonders auf die Typen `multi-hop` und `near-miss`.
-# (Jede Transformation kostet LLM-Calls – 50 Fragen × 5 Varianten sind ok, bei größeren Sets sampeln.)
+# (Jede Transformation kostet LLM-Calls – 64 Fragen × 5 Varianten sind ok, bei größeren Sets sampeln.)
 
 # %%
 # === LOESUNG START ===

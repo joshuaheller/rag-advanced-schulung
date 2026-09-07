@@ -34,12 +34,12 @@ print("Offline-Modus (FAKE_EMBEDDINGS):", settings.fake_embeddings)
 # %% [markdown]
 # ### A2 Der Korpus: „Aurelia Maschinenbau GmbH“
 #
-# 25 Dokumente eines fiktiven Maschinenbauers: HR-Richtlinien, IT-Richtlinien, Produkthandbücher, Preisliste,
+# 42 Dokumente eines fiktiven Maschinenbauers: HR-Richtlinien, IT-Richtlinien, Produkthandbücher, Preisliste,
 # Compliance – teils Markdown, teils **nur als PDF** (mit Tabellen). Dazu zwei Gesetzesauszüge (BUrlG, ArbZG).
 #
 # Eingebaute Fallen, die produktive Systeme genauso haben:
-# - **Near-Misses**: AX-200 vs. AX-300 (ähnliche Handbücher, andere Zahlen)
-# - **Stale Data**: Reisekostenrichtlinie 2024 (ersetzt) neben 2026 (gültig)
+# - **Near-Misses**: AX-100 / AX-200 / AX-300 / BX-500 (ähnliche Handbücher, andere Zahlen), Karlsruhe vs. Linz, Verwaltung vs. Produktion, Neu- vs. Gebrauchtmaschinen, EU- vs. Export-Lieferung
+# - **Stale Data**: ersetzte Fassungen (Reisekosten 2024/2025, IT-Sicherheit 2022, Preisliste 2025, Wartungsplan 2024, AnyConnect) neben den gültigen
 # - **Zugriffsrechte**: Gehaltsbänder (nur HR/Management), Rabattrichtlinie (nur Vertrieb)
 # - **Multi-Hop**: Antworten, die zwei Dokumente brauchen (Richtlinie + Gesetz)
 # - **Tabellen**: Fristen, Preise, Fehlercodes stehen in Tabellen – in PDFs geht die Struktur beim naiven Parsen verloren
@@ -59,7 +59,7 @@ print(pdf_doc.text[600:1300])
 # %% [markdown]
 # ### A3 Das Golden Set
 #
-# 50 Fragen mit Referenzantwort, Quelldokument(en) und Typ. Damit messen wir in jedem Lab, ob eine Änderung
+# 64 Fragen mit Referenzantwort, Quelldokument(en) und Typ. Damit messen wir in jedem Lab, ob eine Änderung
 # wirklich hilft – statt „sieht gut aus“ (LGTM@few).
 
 # %%

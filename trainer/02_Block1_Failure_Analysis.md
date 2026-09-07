@@ -52,7 +52,7 @@ Halluzination → Prompt/Eval (Block 5).
   erkennen) ~100+ Fragen.
 
 ## Stolperfallen
-- `run_golden` auf allen 50 Fragen dauert 3–5 Min – im Lab bei 20 bleiben.
+- `run_golden` auf allen 64 Fragen dauert 3–5 Min – im Lab bei 20 bleiben.
 - Judge-Modell `gpt-5.6-terra` ist teurer als der Generator; für den Kurs ok (< 0,10 USD pro Lauf).
 
 ## Überleitung zu Block 2

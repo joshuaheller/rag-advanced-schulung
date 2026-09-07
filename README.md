@@ -25,8 +25,8 @@ Systemvoraussetzungen: Python 3.11/3.12, 16 GB RAM (min. 8), ~10 GB Platte (Pake
 | `labs/` | 8 Notebooks für Teilnehmende (Walkthrough + Aufgaben mit TODOs) |
 | `labs/solutions/` | dieselben Notebooks mit Musterlösungen (Quelle: `*.py` im jupytext-Format) |
 | `ragkurs/` | Kurs-Bibliothek: Laden, Chunking, Qdrant-Hybrid-Index, Reranker, Pipeline, Evaluation, Security, Cache, Tracing |
-| `data/corpus/` | Korpus „Aurelia Maschinenbau GmbH“: 25 Dokumente (Markdown + PDF) mit eingebauten Fallen |
-| `data/golden/` | Golden Set: 50 Fragen mit Referenzantworten, Quellen und Typ |
+| `data/corpus/` | Korpus „Aurelia Maschinenbau GmbH“: 42 Dokumente (Markdown + PDF) mit eingebauten Fallen |
+| `data/golden/` | Golden Set: 64 Fragen mit Referenzantworten, Quellen und Typ |
 | `data/poison/` | 2 vergiftete Dokumente für Lab 6 (RAG Poisoning, Prompt Injection) |
 | `tests/` + `.github/workflows/` | Eval als CI-Quality-Gate (pytest + DeepEval + GitHub Actions), Lab 5 |
 | `trainer/` | Briefings und Ablauf pro Block (für den Trainer) |

@@ -74,7 +74,7 @@ kannst du bei Bedarf freigeben – sie sind im Repo, das ist kein Geheimnis.
 | Qdrant `already accessed by another instance` | `QDRANT_LOCATION` auf Pfad gesetzt und zwei Kernel offen | Standard `:memory:` lassen |
 | Docling sehr langsam (>2 Min/PDF) | erste Konvertierung lädt Modelle | vorab `download_models.py`; sonst pypdf-Variante zeigen |
 | Phoenix-Port belegt | alter Prozess | `start_phoenix(port=6007)` |
-| Notebook „hängt“ bei `run_golden` | 50 Fragen × 2 LLM-Calls | Subset nehmen: `golden[:15]` – so ist es in den Labs vorgesehen |
+| Notebook „hängt“ bei `run_golden` | 64 Fragen × 2 LLM-Calls | Subset nehmen: `golden[:15]` – so ist es in den Labs vorgesehen |
 
 ## Kostenrahmen
 

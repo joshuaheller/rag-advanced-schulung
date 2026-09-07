@@ -122,7 +122,14 @@ def get_reranker(kind: str):
         elif kind == "quality":
             _registry[kind] = CrossEncoderReranker(settings.reranker_quality)
         elif kind == "colbert":
-            _registry[kind] = ColbertReranker()
+            try:
+                _registry[kind] = ColbertReranker()
+            except Exception as e:  # noqa: BLE001  (rerankers <-> transformers 5.x: bekannter Konflikt)
+                raise RuntimeError(
+                    "ColBERT-Reranker konnte nicht geladen werden (Bibliothekskonflikt rerankers/transformers). "
+                    "Im Kurs: diesen Reranker ueberspringen - das Konzept steht auf den Folien. "
+                    f"Original: {type(e).__name__}: {e}"
+                ) from e
         elif kind == "llm":
             _registry[kind] = LLMReranker()
         else:
