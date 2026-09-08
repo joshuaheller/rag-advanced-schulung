@@ -28,19 +28,30 @@ messen. Der **Hebel-Katalog** (Folie 1.9) ist die Landkarte der nächsten 1,5 Ta
 Halluzination → Prompt/Eval (Block 5).
 
 ## Walkthrough – Sprechtext-Stichpunkte
-- A1: g33 (Spindelöl AX-200). Zeig die Kandidatenliste: „AX-300 steht auf Platz 1 – 400 statt 500 Stunden. Das
-  Modell antwortet ‚treu‘ zum falschen Dokument.“ → Semantic Near-Miss, kein LLM-Problem.
+- A1: g33 (Spindelöl AX-200). Messwert: Antwort **richtig** (500 h). Kandidaten: Wartungsplan 0,693 · AX-200 0,688 ·
+  Wartungsplan **2024** 0,686 · AX-300 0,653 (400 h). Zeig die Scores: „Drei Hundertstel zwischen richtig, veraltet
+  und falschem Modell. Das Modell rettet es, weil alle im Kontext stehen – bei k=3 oder engem Budget nicht mehr.“
+  → Near-Miss ist ein Ranking-Problem; deshalb messen wir p@1, nicht nur Hit@5.
 - A2: Judge aufrufen, JSON zeigen. „Begründung ist Pflicht, sonst kann man den Judge nicht debuggen.“
-- A3: `run_golden` auf 20 Fragen (~1–2 Min). Während es läuft: erklären, was pro Zeile passiert (Retrieval, Antwort,
-  Judge, Heuristik). Dann `failure_breakdown` → Kreuztabelle. „Das ist die Fehler-Landkarte.“
+- A3: `run_golden` auf allen 62 Fragen (~3 Min, 0,02 USD). Während es läuft: erklären, was pro Zeile passiert
+  (Retrieval, Antwort, Judge, Heuristik). Dann `failure_breakdown` → Kreuztabelle. „Das ist die Fehler-Landkarte.“
+  Messwert: Korrektheit **0,903** (56/62), Hit@5 0,983, Refusal korrekt 3/3, 1,15 s/Frage. Die 6 Fehler:
+  g19 stale → `over_refusal` (drei Reisekosten-Fassungen im Kontext, 4 vs. 5 vs. 6 Wochen – das Modell verweigert),
+  g38 + g50 multi-hop → `wrong_answer` (Teilantwort: 2,5 % genannt, Eurobetrag fehlt), g39 tabelle →
+  `partial_evidence` (AX-300-Handbuch statt AX-200), g52 near-miss → `semantic_near_miss` (AX-100 → Wartungsplan/AX-200),
+  g57 near-miss → `wrong_answer` (Export-Lieferzeit, Kernaussage richtig, Details vermischt). Judge-Urteile sind
+  streng-fair; je Lauf kann 1 Frage kippen (g19 war im Einzeltest richtig).
 
 ## Lab 1 (30 Min)
 - B1: Heuristik nachprüfen – TN sollen mindestens einen Fall finden, wo die Heuristik falsch liegt (z. B. `context_noise`
   vergeben, obwohl es ein Zahlendreher war). Das ist gewollt: „Automatik schlägt vor, Mensch entscheidet.“
-- B2: Kreuztabelle + Summe Retrieval vs. Generierung. Erwartung Baseline: deutlich mehr Retrieval-Fehler.
+- B2: Kreuztabelle + Summe Retrieval vs. Generierung. Messwert: **4 Generierung, 2 Retrieval** – das Gegenteil der
+  60–80-%-Regel. Erklärung liefern: kleiner Korpus (Retrieval findet fast alles), starkes Modell, aber Multi-Hop-
+  Rechnungen und Versionskonflikte bleiben liegen. „Die Regel gilt für große Korpora; die Methode gilt immer.“
 - B3: Priorisierung nach Schaden – Diskussion. Zielaussage: falsche Kündigungsfrist/Preis = hoher Schaden, verweigerte
   Antwort = niedriger Schaden. Metrik dafür in Produktion: Korrektheit auf Golden-Subset „kritische Fakten“, No-Answer-Rate.
-- B4 (Bonus): k=20 statt 5 – wenn die Quelle bei k=20 dabei ist, ist Reranking (Block 3) der Hebel.
+- B4 (Bonus): k=20 statt 5 – Messwert: beide Retrieval-Fehler sind bei k=20 dabei (g39 Rang 2, g52 Rang 5) →
+  Reranking (Block 3) ist der Hebel, nicht ein anderes Retrieval.
 - Wo TN hängen: `df.loc[df.id == ..., "failure"] = ...` Syntax; `display()` gibt es nur im Notebook.
 
 ## Typische Fragen

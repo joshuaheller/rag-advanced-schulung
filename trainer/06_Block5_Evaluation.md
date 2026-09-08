@@ -43,7 +43,10 @@ Werte, `flaky=True`/Retries.
 Judge + Nutzerfeedback. Beides speist das Golden Set (Block 7 Feedback-Loop).
 
 ## Walkthrough – Sprechtext-Stichpunkte
-- A1: Baseline vs. hybrid+rerank auf 15 Fragen mit Judge (~2 Min). Tabelle: Korrektheit, Hit-Rate, Refusal, Kosten.
+- A1: Baseline vs. hybrid+rerank auf 14 Fragen mit Judge (~2 Min). Messwert: **0,933 vs. 0,867** – die „bessere“
+  Pipeline verliert eine Multi-Hop-Frage (g04). Das ist die Lektion des Blocks: eine Frage = 7 Punkte, n=14 ist kein
+  Testset. Metriken: Context Precision 0,87/0,90, Recall 0,80/0,79, Faithfulness 0,88/0,84, Answer Relevancy
+  0,67/0,65 (bei knappen Antworten wie „2 Arbeitstage“ systematisch niedrig – erklären, warum).
 - A2: `RagMetrics` – während es läuft (~6 Judge-Calls/Frage, ~3 Min): `ragkurs/metrics.py` öffnen und die vier
   Funktionen zeigen. Dann pro-Frage-Tabelle: „Faithfulness 1.0, correct=False – hier: treu zum AX-300-Kontext.“
 - A3: Judge kalibrieren – 8 Antworten gemeinsam anschauen, mündlich labeln, Labels in B2 eintragen.
@@ -52,11 +55,12 @@ Judge + Nutzerfeedback. Beides speist das Golden Set (Block 7 Feedback-Loop).
   dann die Workflow-YAML: „Ebene 1 bei jedem Push, Ebene 2/3 nur mit Secret.“
 
 ## Lab 5 (45 Min)
-- B1: 5 eigene Fragen als JSONL, `best` darauf laufen lassen. Erwartung: 4/5 korrekt, die Multi-Hop-Rechenfrage
+- B1: 5 eigene Fragen als JSONL, `best` darauf laufen lassen. Messwert Musterlösung: 5/5 korrekt; die Multi-Hop-Rechenfrage
   (7.450 €) ist bewusst schwer.
 - B2: Judge-Kalibrierung: Precision/Recall gegen die 8 Labels aus A3. Typisches Ergebnis: Judge zu streng bei
   „Zusatzinfo“ oder zu großzügig bei Zahlendrehern → Prompt-Anpassung, erneut messen.
-- B3: `regression_gate` – 10 Zeilen. Erwartung: `df_base` gegen `df_best` → FAIL (Baseline ist schlechter).
+- B3: `regression_gate` – 10 Zeilen. Messwert: ref 0,87 → cand 0,93, keine Regression → PASS (im Testlauf war die
+  Baseline die *bessere* – Richtung der Prüfung mit den TN diskutieren).
 - B4: CI-Strategie – 5 Min Markdown, jeder stellt kurz vor.
 - Wo TN hängen: JSON-Format (ensure_ascii=False), `df.merge(...suffixes=...)`.
 
@@ -71,7 +75,8 @@ Judge + Nutzerfeedback. Beides speist das Golden Set (Block 7 Feedback-Loop).
   `valid_from`; bei Reisekosten 2027 werden g18–g21 zu neuen Referenzen.
 
 ## Stolperfallen
-- `RagMetrics.evaluate` auf 15 Fragen ≈ 90 Judge-Calls (~3 Min, ~0,20 USD). Nicht auf 64 Fragen im Lab.
+- `RagMetrics.evaluate` auf 14 Fragen ≈ 85 Judge-Calls (~3 Min, ~0,05 USD). Nicht auf 64 Fragen im Lab.
+- Judge vs. 8 Trainer-Labels: im Testlauf 1,0/1,0 – deshalb die TN wirklich selbst labeln lassen, sonst ist B2 trivial.
 - `pytest` im Notebook via subprocess: `cwd` ist das Repo-Root (Notebooks wechseln beim Start dorthin).
 - DeepEval-Tests (Ebene 3) brauchen den Key und dauern ~30 s – im Lab nur zeigen, nicht laufen lassen, falls Zeit knapp.
 

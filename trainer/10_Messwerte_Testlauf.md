@@ -1,35 +1,46 @@
 # Messwerte aus dem Testlauf (07.09.2026) – und was sie bedeuten
 
 Quelle: `python scripts/run_all_labs.py`, echte Modelle (gpt-5.6-luna / gpt-5.6-terra / text-embedding-3-small), alle 8 Labs OK,
-Gesamtlaufzeit 47 Min. Retrieval-Kennzahlen auf **n = 60** beantwortbaren Fragen (64 minus 2 `negativ` minus 2 `acl`;
+Gesamtlaufzeit 47 Min (Lab 0/1 nach der Baseline-Änderung um 22:08 Uhr neu gelaufen). Retrieval-Kennzahlen auf **n = 60** beantwortbaren Fragen (64 minus 2 `negativ` minus 2 `acl`;
 ACL-Fragen werden seit diesem Lauf in `evaluate_retrieval`/`run_golden` übersprungen, weil sie für `employee` per Definition
 unauffindbar sind – die Werte unten sind entsprechend umgerechnet). Query-Transformationen und Judge sind LLM-abhängig,
 Abweichungen von ±1 Frage (≈ 0,017) zwischen Läufen sind normal.
 
-**Die eine Botschaft für den ganzen Kurs:** Bei 42 Dokumenten ist die naive Baseline schon sehr gut (Hit@5 ≈ 0,98,
-Korrektheit ≈ 0,95). Die Unterschiede zwischen den Techniken liegen bei 1–3 Fragen und zeigen sich fast nur in **p@1 / MRR**
+**Die eine Botschaft für den ganzen Kurs:** Bei 42 Dokumenten ist die naive Baseline schon gut (Hit@5 0,98,
+Korrektheit 0,90 – 6 Fehler, davon 4 in der Generierung). Die Unterschiede zwischen den Techniken liegen bei 1–3 Fragen und zeigen sich fast nur in **p@1 / MRR**
 (steht die richtige Quelle *oben*?), in **Latenz** und **Kosten**. Das ist kein Schönheitsfehler des Kurses, sondern die
 Realität: Die Hebel wirken mit der Korpusgröße – und ohne Golden Set würde man keinen davon sehen. Nicht überverkaufen;
 die Zahlen ehrlich zeigen und die Frage stellen: „Was passiert bei 4.000 Dokumenten?“
 
-## Lab 0 / 1 – Baseline (fixed 800 → dense → k=5)
+## Lab 0 / 1 – Baseline (fixed 800 → dense → k=5, naiv ohne Versionsfilter; Lauf 22:08 Uhr)
 
 | Kennzahl | Wert | Kommentar |
 |---|---|---|
-| Hit@5 | 0,984 (59/60) | ein echter Retrieval-Miss |
-| Recall | 0,975 | Multi-Hop: fast immer beide Quellen |
-| MRR / p@1 | 0,950 / 0,917 | in jeder 12. Frage steht das Richtige nicht oben |
-| Korrektheit (Judge, 19 Fragen) | 0,95–1,0 | 1,75 s/Frage, 0,00026 USD/Frage |
+| Hit@5 | 0,983 (59/60) | ein echter Retrieval-Miss |
+| Recall | 0,967 | Multi-Hop: fast immer beide Quellen |
+| MRR / p@1 | 0,903 / **0,833** | in jeder 6. Frage steht das Richtige nicht oben – meist eine ersetzte Fassung davor |
+| Korrektheit (Judge, 62 Fragen) | **0,903** (56/62) | 1,15 s/Frage, 0,017 USD gesamt, Refusal 3/3 korrekt |
 | Index | 124 Chunks, 2,8 s Aufbau | |
 
-Seit diesem Lauf hat die Baseline `status_filter=None` (naiv: alle Fassungen im Index). Lab 1 läuft auf allen 62 Fragen
-(~2 Min, ~0,02 USD). Erwartung: zusätzlich 1–3 Fehler bei den `stale`-Fragen (Reisekosten 2024/2025 statt 2026) – **vor dem
-Kurs einmal Lab 0+1 neu laufen lassen** (`python scripts/run_all_labs.py 0 1`) und die tatsächlichen Fehler notieren.
+Die 6 Fehler (Lab 1 A3) – alle „echt“, guter Stoff für B1–B3:
 
-g33 (Spindelöl AX-200): Baseline antwortet **richtig** (500 h). Top-5-Scores: Wartungsplan 0,693 · AX-200 0,688 · AX-300 0,653 –
-der Abstand ist hauchdünn, das Modell pickt die richtige Zeile. Auf der Folie „Semantic Near-Misses“ steht deshalb nicht mehr
-„Modell antwortet falsch“, sondern „richtig – aber nur, weil beide im Kontext sind“. Der echte Near-Miss zeigt sich in Lab 2 A2:
-BM25 setzt AX-300 auf Platz 1 (weil im AX-300-Handbuch „gegenüber der AX-200“ steht).
+| ID | Typ | Heuristik | Was passiert |
+|---|---|---|---|
+| g19 | stale | generation:over_refusal | drei Reisekosten-Fassungen im Kontext (4 / 5 / 6 Wochen) → Modell verweigert; im Einzeltest antwortet es richtig – Judge-/Modell-Varianz |
+| g38 | multi-hop | generation:wrong_answer | 36 Monate + 2,5 % genannt, Eurobetrag (4.725 €) nicht ausgerechnet |
+| g39 | tabelle | retrieval:partial_evidence | AX-300-Handbuch statt AX-200 im Kontext, Preisliste da; bei k=20 auf Rang 2 |
+| g50 | multi-hop | generation:wrong_answer | Homeoffice-Tag richtig, Urlaubsteil unvollständig |
+| g52 | near-miss | retrieval:semantic_near_miss | AX-100 → Wartungsplan/AX-200 vorn, AX-100-Handbuch auf Rang 5 (k=20) |
+| g57 | near-miss | generation:wrong_answer | Export-Lieferzeit: 22 Wochen richtig, Details vermischt |
+
+**4 Generierung, 2 Retrieval** – das Gegenteil der 60–80-%-Regel. Erklärung: kleiner Korpus (Retrieval findet fast alles),
+starkes Modell; liegen bleiben Multi-Hop-Rechnungen und Versionskonflikte. B4: beide Retrieval-Fehler sind bei k=20 dabei
+(Rang 2 und 5) → Reranker ist der Hebel. Je Lauf kann eine Frage kippen (Judge ist LLM-basiert).
+
+g33 (Spindelöl AX-200, Lab 1 A1): Antwort **richtig** (500 h). Top-4-Scores: Wartungsplan 0,693 · AX-200 0,688 · Wartungsplan
+**2024** 0,686 · AX-300 0,653 – drei Hundertstel zwischen richtig, veraltet und falschem Modell. Das Modell rettet es, weil
+alle im Kontext stehen. Der echte Near-Miss zeigt sich in Lab 2 A2: BM25 setzt AX-300 auf Platz 1 (weil im AX-300-Handbuch
+„gegenüber der AX-200“ steht).
 
 ## Lab 2 – Retrieval-Strategien
 

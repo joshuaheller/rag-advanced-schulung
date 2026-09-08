@@ -36,23 +36,29 @@ technische“.
 
 ## Walkthrough – Sprechtext-Stichpunkte
 - A1: `tokenize` zeigt Stoppwort-Entfernung und Mini-Stemming („betriebsstund“). Gewichte erklären.
-- A2: Spindelöl-Frage in drei Modi. Erwartung mit echten Embeddings: Dense bringt AX-300 nach vorn, Sparse AX-200
-  (exakter Term), Hybrid beides – „genau das, was wir wollen: der Reranker in Block 3 entscheidet dann“.
+- A2: Spindelöl-Frage in drei Modi. Messwert – **andersherum als intuitiv**: Dense AX-200 (0,75) vorn, Sparse setzt
+  **AX-300** (12,3) vorn, weil im AX-300-Handbuch „gegenüber der AX-200“ und „Spindel“ mehrfach stehen; Hybrid AX-300
+  vor AX-200. Sagen: „Exakte Terme helfen nur, wenn das falsche Dokument sie nicht auch enthält. Lab 3 (Reranker) und
+  Lab 4 (Breadcrumb) lösen genau das.“
 - A3: RRF von Hand – Tabelle mit Dense-Rang / Sparse-Rang / RRF-Score. „Ein Chunk, der in beiden Listen vorne ist,
   gewinnt.“
-- A4: `compare_retrieval` – drei Zeilen. Erwartung: Hybrid ≥ beide Einzelnen, besonders bei `near-miss` und `tabelle`.
-  Danach die Aufschlüsselung nach Typ zeigen.
+- A4: `compare_retrieval` – drei Zeilen. Messwert (n=60): Hit@5 alle 0,984; Recall 0,939 / 0,958 / 0,964;
+  MRR 0,946 / 0,884 / 0,946; **p@1 0,917 / 0,800 / 0,917**. Lesart: BM25 allein rankt schlecht, Hybrid = Dense im
+  Ranking, aber mehr Recall (Multi-Hop). Danach die Aufschlüsselung nach Typ zeigen (Hit@5 und p@1).
 - A5: Query-Transformationen live: einmal `rewrite`, `multi_query`, `decompose` auf die 4-Monate-Frage. Kommentieren,
   was das LLM daraus macht.
 
 ## Lab 2 (35 Min)
-- B1: RRF vs. DBSF, prefetch_k 10/20/50. Erwartung: kleine Unterschiede; prefetch_k > 20 bringt kaum etwas, kostet
-  aber später Reranker-Zeit.
-- B2: Query-Transformationen messen (5 Pipelines × 48 Fragen, ~3–4 Min LLM-Zeit). Erwartung: `decompose` hilft bei
-  multi-hop, `rewrite` neutral, `multi` gemischt, `hyde` bei near-miss riskant (erfindet Zahlen des falschen Modells).
+- B1: RRF vs. DBSF, prefetch_k 10/20/50. Messwert: DBSF +1 Frage (Hit 1,0, MRR 0,952); prefetch_k 10 = 20, bei 50
+  leicht schlechter (0,937). Kostet später Reranker-Zeit – linear.
+- B2: Query-Transformationen messen (5 Pipelines × 60 Fragen, ~10 Min LLM-Zeit – das ist der längste Teil von Lab 2,
+  parallel besprechen). Messwert: rewrite / multi / hyde je **+1 Frage** (Hit 1,0; p@1 0,917 → 0,933 bei multi/hyde)
+  für 135 / 582 / 199 ms statt 8 ms; **decompose −1** (0,966; Teilfragen holen Nachbar-Dokumente). Fazit: Werkzeuge
+  für Fragetypen, kein Standard.
 - B3: Status-Filter: ohne Filter taucht `hr-reisekosten-2024` auf. 30 Sekunden Code, große Diskussion:
   „Wer pflegt bei euch `status`?“
-- B4 (Bonus): Contextual Retrieval auf HR-Chunks (~40 LLM-Calls). Erwartung: MRR steigt leicht.
+- B4 (Bonus): Contextual Retrieval auf HR-Chunks (~40 LLM-Calls). Messwert: **kein Effekt** (0,963 → 0,963, n=27) –
+  die Breadcrumbs tragen den Kontext schon. Sagen: Anthropics −49 % kamen von Chunks *ohne* Struktur.
 - Wo TN hängen: `compare_retrieval` erwartet eine Liste von Pipelines; `PipelineConfig(name=...)` für lesbare Labels.
 
 ## Typische Fragen

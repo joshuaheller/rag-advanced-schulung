@@ -48,9 +48,11 @@ sicher wirken: Folien 0.4–0.6 in 5 Min durchgehen, Zeit für Lab 1 gewinnen.
   unser Röntgenbild – Block 1 lebt davon.“
 
 ## Lab 0 (15 Min)
-- B1: drei Fragen (faktisch / near-miss / negativ). Erwartung: faktisch meist richtig, Near-Miss (g12 Kündigung
-  Arbeitnehmer) oft falsch oder Arbeitgeber-Tabelle, Negativ-Frage manchmal Halluzination.
-- B2: Hit-Rate@5 der Baseline. Erwartung mit echten Embeddings: ~0,6–0,75 gesamt, `tabelle` und `near-miss` schlecht.
+- B1: drei Fragen (faktisch / near-miss / negativ). Messwert: alle drei richtig – auch die Negativ-Frage (Jobticket)
+  wird sauber abgelehnt. Das ist der Moment für: „Sieht fertig aus. Ist es nicht – gleich sehen wir, warum.“
+- B2: Hit-Rate@5 der Baseline. Messwert (n=60, naiv ohne Versionsfilter): Hit@5 **0,983**, Recall 0,967, MRR 0,903,
+  **p@1 0,833** – in jeder sechsten Frage steht die richtige Quelle nicht oben, meist weil eine ersetzte Fassung
+  (Reisekosten 2024/2025, Wartungsplan 2024) davor liegt. Genau das ist der Hebel-Katalog der zwei Tage.
 - Wo TN hängen: `user_roles=["employee"]` vergessen → ACL-Fragen liefern Gehaltsbänder (guter Aufhänger für Block 6).
 
 ## Typische Fragen

@@ -54,7 +54,12 @@ nicht vergleichbar). Daten-Drift: neue Themen in Anfragen → Wissenslücken →
 - B1: `check_alerts` – 15 Zeilen. Auf `log` sollte mind. ein Alert feuern (No-Answer durch Off-Topic-Anfragen).
 - B2: Blue/Green: zweite Collection (800 Zeichen), Dual-Read-Vergleich, `switch`. Diskussion Embedding-Modellwechsel.
 - B3: Feedback-Kandidaten in `candidates.jsonl` + Prozessskizze.
-- B4 (Bonus): Reranker-CPU-Kosten → Worker-Anzahl. Erwartung: `fast` p95 ~1–2 s auf CPU → bei 10k/Tag ~1–2 Worker.
+- B4 (Bonus): Reranker-CPU-Kosten → Worker-Anzahl. Messwert: `fast` p50 124 ms / p95 134 ms → 1.220 CPU-s/Tag,
+  Peak 1,04 req/s → ~1 Worker.
+- Messwerte A2–A4: 38 Anfragen, p50 1,39 s, p95 1,84 s (Generierung p95 1,45 s, Retrieval+Rerank 384 ms), No-Answer 5 %,
+  0,0003 USD/Anfrage; Kosten/Tag bei 10k: k=3 1,63 · k=5 2,02 · k=10 3,36 USD (mit 30 % Cache 1,14 / 1,42 / 2,35).
+  Semantic Cache: Schwelle 0,85, Paraphrasen 0,73–0,86 – mit 0,92 gab es null Treffer; Fallfrage Sonderurlaub muss
+  Miss bleiben. B2 Blue/Green: v1 (1500) MRR 0,975 vs. v2 (800) 0,964 → nicht umschalten.
 - Wo TN hängen: Phoenix-Port; `pipe.index = ...` als Umschalten (in Produktion Qdrant-Alias).
 
 ## Typische Fragen

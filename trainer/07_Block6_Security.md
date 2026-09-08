@@ -48,8 +48,11 @@ EU AI Act Art. 50 (Transparenz, seit 02.08.2026): Nutzer müssen wissen, dass si
 
 ## Walkthrough – Sprechtext-Stichpunkte
 - A1: Beide Poison-Dokumente vorlesen lassen (HTML-Kommentar zeigen: „im Browser unsichtbar“). Dann die zwei Fragen
-  auf sauber vs. vergiftet. Erwartung: vergiftete Pipeline holt das Poison-Dokument auf Platz 1; ob das Modell 2.000 h
-  antwortet oder LubriMax empfiehlt, variiert – **das ist der Punkt**: „Wir wissen es nicht, also darf es nicht in den Index.“
+  auf sauber vs. vergiftet. Messwert: beide Poison-Docs auf Platz 1; Spindelöl kippt auf „2.000 Betriebsstunden [1]“
+  (3/3 Läufe, mit und ohne gehärteten Prompt); die HR-FAQ (35 Tage) setzt sich **nicht** durch – das Modell folgt der
+  offiziellen Richtlinie. Gate: 42 akzeptiert / 2 Quarantäne, 7 Regex-Findings. ACL: 0 Leaks mit Pre-Filter, 4 ohne.
+  Ob das Modell die Werbe-Anweisung (LubriMax) befolgt, variiert – **das ist der Punkt**: „Wir wissen es nicht, also darf
+  es nicht in den Index.“ B4 zählt Poisoning (falsche Zahl) und Injection (Werbung) jetzt getrennt.
 - A2: `scan_documents` → Findings-Tabelle; `ingest_gate` → 2 abgelehnt. Hinweis auf False Positives: „Der Scanner
   ist dumm – in der Praxis Quarantäne statt Löschen.“
 - A3: `acl_leak_test` mit 4 Rollen → alle `leak=False`. Dann `enforce_acl=False` → 4 Leaks. „Ein vergessener

@@ -35,16 +35,17 @@ Folie mit Platzhaltern zeigen, im Lab füllen, danach in die Folie übernehmen (
 - A1: `get_reranker("fast")` – Ladezeit nennen (aus Cache Sekunden, sonst Download).
 - A2: Kündigungsfrist-Frage (9 Jahre, Arbeitgeber). Vorher/Nachher-Liste zeigen: „Der Cross-Encoder zieht die
   Arbeitgeber-Tabelle nach vorn, weil er ‚kann Aurelia kündigen‘ und ‚Kündigung durch den Arbeitgeber‘ zusammen liest.“
-  Latenz für 20 Kandidaten nennen (CPU: ~0,5–2 s beim `fast`-Modell).
-- A3: `compare_retrieval` hybrid vs. hybrid+rerank. Erwartung: Hit-Rate gleich oder minimal höher (Recall ändert sich
-  nicht!), **MRR deutlich höher**. Das ist die Kernaussage: „Recall bleibt, Precision steigt.“
-- A4: prefetch_k-Sweep – Latenz wächst linear, Qualität sättigt bei ~20.
+  Messwert: Arbeitgeber-Abschnitt von Platz 2 auf Platz 1, 728 ms für 20 Kandidaten beim ersten Aufruf (danach ~200 ms).
+- A3: `compare_retrieval` hybrid vs. hybrid+rerank. Messwert: Hit@5 0,984 → 1,0 (eine Frage rutscht von Rang 6 in die
+  Top-5), **MRR 0,946 → 0,975, p@1 0,917 → 0,950**, 9 → 222 ms. Kernaussage: „Recall bleibt, Precision steigt.“
+- A4: prefetch_k-Sweep – Messwert: 5 → MRR 0,975 / 56 ms; **10 → 0,984 / 109 ms**; 20 → 0,975 / 213 ms; 40 → 0,975 /
+  412 ms. Sättigung bei 10, Latenz linear.
 
 ## Lab 3 (30 Min)
-- B1: Trade-off-Tabelle fast/quality/colbert. Erwartung: quality (bge-m3) beste MRR, aber p95 mehrere Sekunden auf
-  CPU; colbert schnell, auf Deutsch schwächer; fast guter Kompromiss. **Hinweis vorab:** bge-reranker-v2-m3 laden
-  dauert ~30–60 s und braucht ~3 GB RAM.
-- B2: Kaskade vs. direkt. Erwartung: ähnliche Qualität, Kaskade deutlich schneller.
+- B1: Trade-off-Tabelle. Messwert: fast MRR 0,975, p50 216 / p95 289 ms; **quality MRR 0,992, p50 2,3 s / p95 3,8 s**,
+  Laden 7 s (aus dem Cache), ~3 GB RAM; **colbert wird mit Fehlermeldung übersprungen** (Bibliothekskonflikt
+  rerankers/transformers 5 – erwartet, Konzept auf Folie 3.3 erklären). B4: LLM-Reranker 1,0 auf 10 Fragen, 1,1 s.
+- B2: Kaskade vs. direkt. Messwert: gleiche Qualität (MRR 0,992), Kaskade **p50 1,9 s** vs. quality direkt **5,4 s**.
 - B3: Auswahl für den eigenen Fall – 5 Min Markdown, dann jeder TN 1 Min vorstellen.
 - B4 (Bonus): LLM-Reranker auf 10 Fragen – langsam (~2–4 s/Frage), gut. Diskussion: wann ok?
 - Wo TN hängen: Reranker-Objekte sind gecacht (`get_reranker`), das große Modell nur einmal laden; `retrieval_row`
@@ -62,9 +63,9 @@ Folie mit Platzhaltern zeigen, im Lab füllen, danach in die Folie übernehmen (
   Kaskade dahinter.
 
 ## Stolperfallen
-- Erster Aufruf von `quality` lädt 2,2 GB – falls Download nicht vorbereitet: B1 nur mit fast/colbert.
+- Erster Aufruf von `quality` lädt 2,2 GB – falls Download nicht vorbereitet: B1 nur mit fast.
 - Speicher: bge-m3 + Docling gleichzeitig in einem Kernel kann bei 8-GB-VMs eng werden → Kernel neu starten.
 
 ## Überleitung zu Block 4
-„Reranker sortieren, was da ist. Aber bei den Tabellenfragen ist die Antwort *nicht da* – weil das Parsing sie
-zerstört hat. Also: einen Schritt zurück in der Pipeline.“
+„Reranker sortieren, was da ist. Was das Parsing zerstört oder das Chunking vom Produktnamen trennt, kann er nicht
+nach vorn holen. Also: einen Schritt zurück in der Pipeline – Parsing, Struktur, Breadcrumb.“
